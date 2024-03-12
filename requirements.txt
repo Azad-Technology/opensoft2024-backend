@@ -1,13 +1,16 @@
 annotated-types==0.6.0
 anyio==4.3.0
+bcrypt==4.1.2
 click==8.1.7
 dnspython==2.6.1
+email_validator==2.1.1
 fastapi==0.110.0
 h11==0.14.0
 idna==3.6
 motor==3.3.2
 pydantic==2.6.3
 pydantic_core==2.16.3
+PyJWT==2.8.0
 pymongo==4.6.2
 python-dotenv==1.0.1
 sniffio==1.3.1
