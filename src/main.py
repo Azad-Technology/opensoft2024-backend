@@ -15,9 +15,8 @@ app.add_middleware(
 )
 
 app.include_router(movie.router)
-app.include_router(cast.router)
+app.include_router(cast.router,tags=["Cast and Director"])
 
 @app.get("/")
 async def root():
-    print('Hello World')
     return {"message": "Hello World"}
