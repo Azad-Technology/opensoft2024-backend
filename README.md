@@ -66,6 +66,37 @@ project_root
 
 ## Usage
 
+- **User SignUp**:
+  Endpoint: `POST /signup`
+
+  Request:
+  ```json5
+  {
+    "name": str,
+    "email": str,
+    "password": str
+  }
+  ```
+
+- **User Login**:
+  Endpoint: `POST /login`
+
+  Request:
+  ```json5
+  {
+    "email": str,
+    "password": str
+  }
+  ```
+  Response:
+  ```json5
+  {
+    "status": "success",
+    "token": {jwt_token}
+  }
+  ```
+
+
 
 - **Get Movie by ID**:
   Endpoint: `GET /movies/{_id}`

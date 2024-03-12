@@ -5,7 +5,7 @@ from src.db import Movies
 from src import schemas
 from src.config import config
 from bson.objectid import ObjectId
-\
+
 router = APIRouter()
 
 
