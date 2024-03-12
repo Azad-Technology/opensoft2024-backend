@@ -155,3 +155,324 @@ project_root
     }
   }
   ```
+  
+
+- **Get Movie by Director**:
+  Endpoint: `GET /director/{director_name}`
+
+  Response:
+
+  ```json5
+  [
+    {
+        "_id": "573a1390f29313caabcd4803",
+        "plot": "Cartoon figures announce, via comic strip balloons, that they will move - and move they do, in a wildly exaggerated style.",
+        "genres": [
+            "Animation",
+            "Short",
+            "Comedy"
+        ],
+        "runtime": 7,
+        "cast": [
+            "Winsor McCay"
+        ],
+        "num_mflix_comments": 0,
+        "poster": "https://m.media-amazon.com/images/M/MV5BYzg2NjNhNTctMjUxMi00ZWU4LWI3ZjYtNTI0NTQxNThjZTk2XkEyXkFqcGdeQXVyNzg5OTk2OA@@._V1_SY1000_SX677_AL_.jpg",
+        "title": "Winsor McCay, the Famous Cartoonist of the N.Y. Herald and His Moving Comics",
+        "fullplot": "Cartoonist Winsor McCay agrees to create a large set of drawings that will be photographed and made into a motion picture. The job requires plenty of drawing supplies, and the cartoonist must also overcome some mishaps caused by an assistant. Finally, the work is done, and everyone can see the resulting animated picture.",
+        "languages": [
+            "English"
+        ],
+        "released": "1911-04-08T00:00:00",
+        "directors": [
+            "Winsor McCay",
+            "J. Stuart Blackton"
+        ],
+        "writers": [
+            "Winsor McCay (comic strip \"Little Nemo in Slumberland\")",
+            "Winsor McCay (screenplay)"
+        ],
+        "awards": {
+            "wins": 1,
+            "nominations": 0,
+            "text": "1 win."
+        },
+        "lastupdated": "2015-08-29 01:09:03.030000000",
+        "year": 1911,
+        "imdb": {
+            "rating": 7.3,
+            "votes": 1034,
+            "id": 1737
+        },
+        "countries": [
+            "USA"
+        ],
+        "type": "movie",
+        "tomatoes": {
+            "viewer": {
+                "rating": 3.4,
+                "numReviews": 89,
+                "meter": 47
+            },
+            "lastUpdated": "2015-08-20T18:51:24"
+        }
+    },
+    {
+        "_id": "573a1390f29313caabcd50e5",
+        "plot": "The cartoonist, Winsor McCay, brings the Dinosaurus back to life in the figure of his latest creation, Gertie the Dinosaur.",
+        "genres": [
+            "Animation",
+            "Short",
+            "Comedy"
+        ],
+        "runtime": 12,
+        "cast": [
+            "Winsor McCay",
+            "George McManus",
+            "Roy L. McCardell"
+        ],
+        "num_mflix_comments": 0,
+        "poster": "https://m.media-amazon.com/images/M/MV5BMTQxNzI4ODQ3NF5BMl5BanBnXkFtZTgwNzY5NzMwMjE@._V1_SY1000_SX677_AL_.jpg",
+        "title": "Gertie the Dinosaur",
+        "fullplot": "Winsor Z. McCay bets another cartoonist that he can animate a dinosaur. So he draws a big friendly herbivore called Gertie. Then he get into his own picture. Gertie walks through the picture, eats a tree, meets her creator, and takes him carefully on her back for a ride.",
+        "languages": [
+            "English"
+        ],
+        "released": "1914-09-15T00:00:00",
+        "directors": [
+            "Winsor McCay"
+        ],
+        "writers": [
+            "Winsor McCay"
+        ],
+        "awards": {
+            "wins": 1,
+            "nominations": 0,
+            "text": "1 win."
+        },
+        "lastupdated": "2015-08-18 01:03:15.313000000",
+        "year": 1914,
+        "imdb": {
+            "rating": 7.3,
+            "votes": 1837,
+            "id": 4008
+        },
+        "countries": [
+            "USA"
+        ],
+        "type": "movie",
+        "tomatoes": {
+            "viewer": {
+                "rating": 3.7,
+                "numReviews": 29
+            },
+            "lastUpdated": "2015-08-10T19:20:03"
+        }
+    },
+    {
+        "_id": "573a13a5f29313caabd13572",
+        "plot": "Cartoon figures announce, via comic strip balloons, that they will move - and move they do, in a wildly exaggerated style.",
+        "genres": [
+            "Animation",
+            "Short",
+            "Comedy"
+        ],
+        "runtime": 7,
+        "cast": [
+            "Winsor McCay"
+        ],
+        "poster": "https://m.media-amazon.com/images/M/MV5BYzg2NjNhNTctMjUxMi00ZWU4LWI3ZjYtNTI0NTQxNThjZTk2XkEyXkFqcGdeQXVyNzg5OTk2OA@@._V1_SY1000_SX677_AL_.jpg",
+        "title": "Winsor McCay, the Famous Cartoonist of the N.Y. Herald and His Moving Comics",
+        "fullplot": "Cartoonist Winsor McCay agrees to create a large set of drawings that will be photographed and made into a motion picture. The job requires plenty of drawing supplies, and the cartoonist must also overcome some mishaps caused by an assistant. Finally, the work is done, and everyone can see the resulting animated picture.",
+        "languages": [
+            "English"
+        ],
+        "released": "1911-04-08T00:00:00",
+        "directors": [
+            "Winsor McCay",
+            "J. Stuart Blackton"
+        ],
+        "writers": [
+            "Winsor McCay (comic strip \"Little Nemo in Slumberland\")",
+            "Winsor McCay (screenplay)"
+        ],
+        "awards": {
+            "wins": 1,
+            "nominations": 0,
+            "text": "1 win."
+        },
+        "lastupdated": "2015-08-31 01:05:38.577000000",
+        "year": 1911,
+        "imdb": {
+            "rating": 7.3,
+            "votes": 1036,
+            "id": 1737
+        },
+        "countries": [
+            "USA"
+        ],
+        "type": "movie",
+        "num_mflix_comments": 0
+    }
+  ] 
+  ```
+
+- **Get Movie by cast**:
+  Endpoint: `GET /cast/{cast_name}`
+
+  Response:
+
+  ```json5
+  [
+    {
+        "_id": "573a1390f29313caabcd4803",
+        "plot": "Cartoon figures announce, via comic strip balloons, that they will move - and move they do, in a wildly exaggerated style.",
+        "genres": [
+            "Animation",
+            "Short",
+            "Comedy"
+        ],
+        "runtime": 7,
+        "cast": [
+            "Winsor McCay"
+        ],
+        "num_mflix_comments": 0,
+        "poster": "https://m.media-amazon.com/images/M/MV5BYzg2NjNhNTctMjUxMi00ZWU4LWI3ZjYtNTI0NTQxNThjZTk2XkEyXkFqcGdeQXVyNzg5OTk2OA@@._V1_SY1000_SX677_AL_.jpg",
+        "title": "Winsor McCay, the Famous Cartoonist of the N.Y. Herald and His Moving Comics",
+        "fullplot": "Cartoonist Winsor McCay agrees to create a large set of drawings that will be photographed and made into a motion picture. The job requires plenty of drawing supplies, and the cartoonist must also overcome some mishaps caused by an assistant. Finally, the work is done, and everyone can see the resulting animated picture.",
+        "languages": [
+            "English"
+        ],
+        "released": "1911-04-08T00:00:00",
+        "directors": [
+            "Winsor McCay",
+            "J. Stuart Blackton"
+        ],
+        "writers": [
+            "Winsor McCay (comic strip \"Little Nemo in Slumberland\")",
+            "Winsor McCay (screenplay)"
+        ],
+        "awards": {
+            "wins": 1,
+            "nominations": 0,
+            "text": "1 win."
+        },
+        "lastupdated": "2015-08-29 01:09:03.030000000",
+        "year": 1911,
+        "imdb": {
+            "rating": 7.3,
+            "votes": 1034,
+            "id": 1737
+        },
+        "countries": [
+            "USA"
+        ],
+        "type": "movie",
+        "tomatoes": {
+            "viewer": {
+                "rating": 3.4,
+                "numReviews": 89,
+                "meter": 47
+            },
+            "lastUpdated": "2015-08-20T18:51:24"
+        }
+    },
+    {
+        "_id": "573a1390f29313caabcd50e5",
+        "plot": "The cartoonist, Winsor McCay, brings the Dinosaurus back to life in the figure of his latest creation, Gertie the Dinosaur.",
+        "genres": [
+            "Animation",
+            "Short",
+            "Comedy"
+        ],
+        "runtime": 12,
+        "cast": [
+            "Winsor McCay",
+            "George McManus",
+            "Roy L. McCardell"
+        ],
+        "num_mflix_comments": 0,
+        "poster": "https://m.media-amazon.com/images/M/MV5BMTQxNzI4ODQ3NF5BMl5BanBnXkFtZTgwNzY5NzMwMjE@._V1_SY1000_SX677_AL_.jpg",
+        "title": "Gertie the Dinosaur",
+        "fullplot": "Winsor Z. McCay bets another cartoonist that he can animate a dinosaur. So he draws a big friendly herbivore called Gertie. Then he get into his own picture. Gertie walks through the picture, eats a tree, meets her creator, and takes him carefully on her back for a ride.",
+        "languages": [
+            "English"
+        ],
+        "released": "1914-09-15T00:00:00",
+        "directors": [
+            "Winsor McCay"
+        ],
+        "writers": [
+            "Winsor McCay"
+        ],
+        "awards": {
+            "wins": 1,
+            "nominations": 0,
+            "text": "1 win."
+        },
+        "lastupdated": "2015-08-18 01:03:15.313000000",
+        "year": 1914,
+        "imdb": {
+            "rating": 7.3,
+            "votes": 1837,
+            "id": 4008
+        },
+        "countries": [
+            "USA"
+        ],
+        "type": "movie",
+        "tomatoes": {
+            "viewer": {
+                "rating": 3.7,
+                "numReviews": 29
+            },
+            "lastUpdated": "2015-08-10T19:20:03"
+        }
+    },
+    {
+        "_id": "573a13a5f29313caabd13572",
+        "plot": "Cartoon figures announce, via comic strip balloons, that they will move - and move they do, in a wildly exaggerated style.",
+        "genres": [
+            "Animation",
+            "Short",
+            "Comedy"
+        ],
+        "runtime": 7,
+        "cast": [
+            "Winsor McCay"
+        ],
+        "poster": "https://m.media-amazon.com/images/M/MV5BYzg2NjNhNTctMjUxMi00ZWU4LWI3ZjYtNTI0NTQxNThjZTk2XkEyXkFqcGdeQXVyNzg5OTk2OA@@._V1_SY1000_SX677_AL_.jpg",
+        "title": "Winsor McCay, the Famous Cartoonist of the N.Y. Herald and His Moving Comics",
+        "fullplot": "Cartoonist Winsor McCay agrees to create a large set of drawings that will be photographed and made into a motion picture. The job requires plenty of drawing supplies, and the cartoonist must also overcome some mishaps caused by an assistant. Finally, the work is done, and everyone can see the resulting animated picture.",
+        "languages": [
+            "English"
+        ],
+        "released": "1911-04-08T00:00:00",
+        "directors": [
+            "Winsor McCay",
+            "J. Stuart Blackton"
+        ],
+        "writers": [
+            "Winsor McCay (comic strip \"Little Nemo in Slumberland\")",
+            "Winsor McCay (screenplay)"
+        ],
+        "awards": {
+            "wins": 1,
+            "nominations": 0,
+            "text": "1 win."
+        },
+        "lastupdated": "2015-08-31 01:05:38.577000000",
+        "year": 1911,
+        "imdb": {
+            "rating": 7.3,
+            "votes": 1036,
+            "id": 1737
+        },
+        "countries": [
+            "USA"
+        ],
+        "type": "movie",
+        "num_mflix_comments": 0
+    }
+  ]
+  ```
