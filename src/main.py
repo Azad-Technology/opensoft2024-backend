@@ -14,9 +14,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(movie.router, prefix='/api')
+app.include_router(movie.router, tags=['movie'])
 
 @app.get("/")
 async def root():
-    print('Hello World')
     return {"message": "Hello World"}

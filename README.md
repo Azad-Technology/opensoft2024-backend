@@ -61,3 +61,66 @@ project_root
 
 <br />
 <br />
+
+
+
+## Usage
+
+
+- **Get Movie by ID**:
+  Endpoint: `GET /movies/{_id}`
+
+  Response:
+
+  ```json5
+  {
+    "_id": "573a1390f29313caabcd446f",
+    "plot": "A greedy tycoon decides, on a whim, to corner the world market in wheat. This doubles the price of bread, forcing the grain's producers into charity lines and further into poverty. The film...",
+    "genres": [
+        "Short",
+        "Drama"
+    ],
+    "runtime": 14,
+    "cast": [
+        "Frank Powell",
+        "Grace Henderson",
+        "James Kirkwood",
+        "Linda Arvidson"
+    ],
+    "num_mflix_comments": 1,
+    "title": "A Corner in Wheat",
+    "fullplot": "A greedy tycoon decides, on a whim, to corner the world market in wheat. This doubles the price of bread, forcing the grain's producers into charity lines and further into poverty. The film continues to contrast the ironic differences between the lives of those who work to grow the wheat and the life of the man who dabbles in its sale for profit.",
+    "languages": [
+        "English"
+    ],
+    "released": "1909-12-13T00:00:00",
+    "directors": [
+        "D.W. Griffith"
+    ],
+    "rated": "G",
+    "awards": {
+        "wins": 1,
+        "nominations": 0,
+        "text": "1 win."
+    },
+    "lastupdated": "2015-08-13 00:46:30.660000000",
+    "year": 1909,
+    "imdb": {
+        "rating": 6.6,
+        "votes": 1375,
+        "id": 832
+    },
+    "countries": [
+        "USA"
+    ],
+    "type": "movie",
+    "tomatoes": {
+        "viewer": {
+            "rating": 3.6,
+            "numReviews": 109,
+            "meter": 73
+        },
+        "lastUpdated": "2015-05-11T18:36:53"
+    }
+  }
+  ```
