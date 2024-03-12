@@ -13,7 +13,7 @@ router=APIRouter()
 async def get_movie_by_genre(genre_name:str):
     try:
         
-        movies_cur = Movies.find({"genres": {'$in':[genre_name]}}).limit(10)
+        movies_cur = Movies.find({"genres": {'$in':[genre_name]}}).limit(5)
         movies=await movies_cur.to_list(length=None)
         ret=[]
         
