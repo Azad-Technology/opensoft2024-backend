@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from src.config import config
 from src.db import db
-from src.routers import movie
+from src.routers import movie,cast
 app = FastAPI()
 
 
@@ -14,7 +14,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(movie.router, prefix='/api')
+app.include_router(movie.router)
+app.include_router(cast.router)
 
 @app.get("/")
 async def root():
