@@ -14,7 +14,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(movie.router)
+app.include_router(movie.router,tags=['movie'])
 app.include_router(cast.router,tags=["Cast and Director"])
 
 @app.get("/")
