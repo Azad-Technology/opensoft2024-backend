@@ -20,3 +20,7 @@ app.include_router(cast.router,tags=["Cast and Director"])
 @app.get("/")
 async def root():
     return {"message": "Hello World"}
+
+@app.get("/health")
+async def health():
+    return {"message": "OK"}
