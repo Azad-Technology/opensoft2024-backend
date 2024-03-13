@@ -477,7 +477,7 @@ project_root
   ]
   ```
 
-  - **Get Movie by genre**:
+- **Get Movie by genre**:
   Endpoint: `GET /genre/{genre_name}`
   
   Response:
