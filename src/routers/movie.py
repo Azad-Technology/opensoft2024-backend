@@ -13,6 +13,7 @@ router = APIRouter()
 
 @router.get('/movies/{movie_id}')
 async def get_movie(movie_id: str):
+    # projection={"_id":1, "title":1, "poster":1, "released": 1, "runtime":1, 'imdb':1, 'tomatoes':1}
     movie = await Movies.find_one({'_id': ObjectId(movie_id)})
     if movie:
         if '_id' in movie:
