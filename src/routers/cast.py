@@ -14,6 +14,7 @@ async def get_cast(cast_name: str):
     projection={"_id":1, "title":1, "poster":1, "released": 1, "runtime":1, 'imdb':1, 'tomatoes':1}
     movies = await Movies.find({"cast": {"$elemMatch": {"$eq": str(cast_name)}}}, projection).to_list(length=None)
     # movies = await movie_cursor  # Convert cursor to a list of documents
+    print(movies)
     filtered_movies = []
     for movie in movies:
         if '_id' in movie:
