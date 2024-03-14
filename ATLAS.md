@@ -246,3 +246,9 @@ Uses the following pipeline stages:
 2. $project stage to:
     - Exclude all fields except title and year
     - Add two fields named score and highlights
+
+
+### Highlight Search Terms in Results
+
+Add fields to the result that displays search terms in their original context.
+[Read more ](https://www.mongodb.com/docs/atlas/atlas-search/highlighting/)

@@ -10,9 +10,11 @@ router = APIRouter()
 
 @router.get('/cast/{cast_name}')
 async def get_cast(cast_name: str):
+    print(cast_name)
     projection={"_id":1, "title":1, "poster":1, "released": 1, "runtime":1, 'imdb':1, 'tomatoes':1}
-    movie_cursor = Movies.find({"cast": {"$elemMatch": {"$eq": str(cast_name)}}}, projection)
-    movies = await movie_cursor.to_list(length=None)  # Convert cursor to a list of documents
+    movies = await Movies.find({"cast": {"$elemMatch": {"$eq": str(cast_name)}}}, projection).to_list(length=None)
+    # movies = await movie_cursor  # Convert cursor to a list of documents
+    print(movies)
     filtered_movies = []
     for movie in movies:
         if '_id' in movie:
@@ -20,20 +22,18 @@ async def get_cast(cast_name: str):
         filtered_movies.append(movie)
     if filtered_movies:
         return filtered_movies
-    raise HTTPException(status_code=404, detail='Movie with Given Caste not found')
+    return filtered_movies
 
 @router.get('/director/{director_name}')
 async def get_director(director_name: str):
     projection={"_id":1, "title":1, "poster":1, "released": 1, "runtime":1, 'imdb':1, 'tomatoes':1}
-    movie_cursor = Movies.find({"directors": {"$elemMatch": {"$eq": str(director_name)}}}, projection)
-    movies = await movie_cursor.to_list(length=None)  # Convert cursor to a list of documents
+    movies = await Movies.find({"directors": {"$elemMatch": {"$eq": str(director_name)}}}, projection).to_list(length=None)
+    # movies = await movie_cursor  # Convert cursor to a list of documents
     filtered_movies = []
     for movie in movies:
         if '_id' in movie:
             movie['_id']=str(movie['_id'])
         filtered_movies.append(movie)
-    if filtered_movies:
-        return filtered_movies
-    raise HTTPException(status_code=404, detail='Movie with Given Caste not found')
+    return filtered_movies
 
 
