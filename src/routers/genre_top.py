@@ -8,22 +8,20 @@ from bson.objectid import ObjectId
 
 router=APIRouter()
 
-
-@router.get('/genre/{genre_name}')
-async def get_movie_by_genre(genre_name:str):
+@router.get('/genre_top/{genre_name}/{count}')
+async def get_movies(genre_name:str, count:int):
+    
     try:
+        if count<1:
+           raise HTTPException(status_code=404, detail="Please enter a valid count of movies to be fetched ")
         projection={"_id":1, "title":1, "poster":1, "released": 1, "runtime":1, 'imdb':1, 'tomatoes':1}
-        movies_cur = Movies.find({"genres": {'$in':[genre_name]}}, projection).limit(5)
-        movies=await movies_cur.to_list(length=None)
-        ret=[]
-        
+        movies_cur = Movies.find({"imdb.rating":{'$ne':''},"genres": {'$in':[genre_name]}},projection).sort([("imdb.rating", -1)]).limit(count)
+        movies = await movies_cur.to_list(length=None)
         if movies:
             for movie in movies:
-                if '_id' in movie:
-                    movie['_id']=str(movie['_id'])
-                ret.append(movie)
-        if ret:
-            return ret
+                 movie['_id']= str(movie['_id'])
+            return movies
         raise HTTPException(status_code=404, detail="No movie found for this genre")
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+                
