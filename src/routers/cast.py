@@ -20,7 +20,7 @@ async def get_cast(cast_name: str):
         filtered_movies.append(movie)
     if filtered_movies:
         return filtered_movies
-    raise HTTPException(status_code=404, detail='Movie with Given Caste not found')
+    return filtered_movies
 
 @router.get('/director/{director_name}')
 async def get_director(director_name: str):
@@ -32,8 +32,6 @@ async def get_director(director_name: str):
         if '_id' in movie:
             movie['_id']=str(movie['_id'])
         filtered_movies.append(movie)
-    if filtered_movies:
-        return filtered_movies
-    raise HTTPException(status_code=404, detail='Movie with Given Caste not found')
+    return filtered_movies
 
 
