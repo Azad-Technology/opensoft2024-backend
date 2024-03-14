@@ -18,6 +18,6 @@ async def get_movie(movie_id: str):
     if movie:
         if '_id' in movie:
             movie['_id'] = str(movie['_id'])
-        return movie
-    raise HTTPException(status_code=404, detail='Movie not found')
+        return [movie]
+    return []
 
