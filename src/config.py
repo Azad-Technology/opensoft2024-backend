@@ -3,6 +3,7 @@ import os
 BASEDIR = os.path.abspath(os.path.dirname(__file__))
 load_dotenv()
 
+print(BASEDIR)
 
 config = {
     'MONGO_INITDB_DATABASE':os.getenv('MONGO_INITDB_DATABASE'),
