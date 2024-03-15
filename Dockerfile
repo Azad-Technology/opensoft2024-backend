@@ -1,6 +1,17 @@
-FROM python:3.10
+FROM python:3.10-slim
+
 WORKDIR /code
+
 COPY requirements.txt .
-RUN pip install --no-cache-dir --upgrade -r requirements.txt
+
+RUN pip install --no-cache-dir -r requirements.txt
+
 COPY . .
-CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "80"]
+
+EXPOSE 8000
+
+ENV UVICORN_HOST=0.0.0.0
+ENV UVICORN_PORT=8000
+ENV UVICORN_WORKERS=5
+
+CMD uvicorn src.main:app --host $UVICORN_HOST --port $UVICORN_PORT --workers $UVICORN_WORKERS
