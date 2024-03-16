@@ -26,9 +26,9 @@ async def signup(request: schemas.UserSignupSchema):
     await User.insert_one(user)
     if '_id' in user:
         user['_id'] = str(user['_id'])
-    db_user = await User.find_one({'email': request.email.lower()})
-    # if db_user:
-    #     print("Found")
+    # db_user = await User.find_one({'email': request.email.lower()})
+    # # if db_user:
+    # #     print("Found")
     return {"message": "User created successfully.", "user": user}
 
 
