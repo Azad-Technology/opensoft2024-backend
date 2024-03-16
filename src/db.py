@@ -14,3 +14,4 @@ Embedded_movies = db.embedded_movies
 Movies = db.movies
 Sessions = db.sessions
 Theaters = db.theaters
+
