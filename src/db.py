@@ -2,7 +2,7 @@ from pymongo import mongo_client
 from src.config import config
 from motor.motor_asyncio import AsyncIOMotorClient
 
-client = AsyncIOMotorClient('mongodb+srv://somya:123@cluster0.yhd6kk7.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0')
+client = AsyncIOMotorClient(config['DATABASE_URL'])
 db = client[config['MONGO_INITDB_DATABASE']]
 print('Connected to MongoDB')
 
