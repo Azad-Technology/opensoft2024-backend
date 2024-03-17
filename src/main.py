@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from src.config import config
 from src.db import db
-from src.routers import movie,cast,genre, movies2, auth
+from src.routers import movie,cast,genre, movies2, auth, embeddings
 app = FastAPI()
 
 
@@ -17,8 +17,6 @@ app.add_middleware(
 app.include_router(movie.router,tags=['movie'])
 app.include_router(cast.router,tags=["Cast and Director"])
 app.include_router(genre.router, tags=["Genre"])
-# app.include_router(movies2.router, tags=["movies"])
-app.include_router(auth.router, tags=['auth'])
 
 @app.get("/")
 async def root():
