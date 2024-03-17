@@ -380,8 +380,8 @@ project_root
   ]
   ```
 
-  **Get top count number of movies in a region**:
-  Endpoint: `GET /genre_top/{region_name}/?count={count}`
+  **Get top count number of movies in a country**:
+  Endpoint: `GET /countries_top/{country_name}/?count={count}`
 
   Response:
 
