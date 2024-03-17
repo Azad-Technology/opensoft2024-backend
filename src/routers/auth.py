@@ -1,8 +1,10 @@
 from fastapi import APIRouter, Depends, HTTPException, Request, status, Security
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from pydantic import BaseModel, Field, ValidationError, validator
+import re
 import bcrypt
 from src import schemas
-from src.db import User
+from src.db import Users as User
 import jwt
 from src.config import config
 router = APIRouter()
@@ -20,19 +22,24 @@ async def signup(request: schemas.UserSignupSchema):
         "email": request.email.lower(),
         "password": hashed_password,
     }
+    
     await User.insert_one(user)
     if '_id' in user:
         user['_id'] = str(user['_id'])
+    # db_user = await User.find_one({'email': request.email.lower()})
+    # # if db_user:
+    # #     print("Found")
     return {"message": "User created successfully.", "user": user}
 
 
 @router.post('/login')
 async def login(payload: schemas.UserLoginSchema):
     db_user = await User.find_one({'email': payload.email.lower()})
+    # print(db_user)
     if not db_user:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Incorrect email')
     hashed_password = db_user.get('password')
-    _id = db_user.get("id")
+    _id = db_user.get("_id")
     if not _id:
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='User ID not found')
     if not bcrypt.checkpw(payload.password.encode('utf-8'), hashed_password.encode('utf-8')):
@@ -41,7 +48,6 @@ async def login(payload: schemas.UserLoginSchema):
     return {'status': 'success', 'token': token}
 
 security = HTTPBearer()
-
 
 async def get_current_user(
     credentials: HTTPAuthorizationCredentials = Security(security)
