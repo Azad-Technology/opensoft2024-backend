@@ -37,3 +37,11 @@ class UserSignupSchema(BaseModel):
 class UserLoginSchema(BaseModel):
     email: EmailStr
     password: str
+
+class MovieEmbedSchema(BaseModel):
+    _id: str
+    title: str
+    plot: str
+
+class RRFQuerySchema(BaseModel):
+    query: str
