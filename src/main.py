@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from src.config import config
 from src.db import db
-from src.routers import movie,cast,genre
+from src.routers import movie,cast,genre, movies2, auth, embeddings
 app = FastAPI()
 
 

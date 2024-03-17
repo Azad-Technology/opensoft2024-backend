@@ -2,3 +2,6 @@ env/
 .env
 __pycache__/
 .vercel
+src/routers/movies2.py
+test.py
+src/db.py
