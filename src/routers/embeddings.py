@@ -6,16 +6,15 @@ import jwt
 from src.config import config
 router = APIRouter()
 from bson.objectid import ObjectId
-from src.utils.text_embedder import embed_movie, get_embedding
 from src.utils.ada_embedder import embed_movie as embed_movie_ada, get_embedding as get_embedding_ada
-from src.db import Movies, Movies2, Embedded_movies2
+from src.db import Movies, Embedded_movies
 
 
 @router.get("/init_embeddings")
 async def init_embeddings():
 
-
-    movies = await Movies2.find().to_list(500)
+    movies = await Movies.find().to_list(25000)
+    # return {"message": "Embeddings initialized"}
     for movie in movies:
         print(f"Generating embedding for {movie['title']}")
         if "plot" not in movie:
@@ -24,7 +23,7 @@ async def init_embeddings():
         embedding = embedding[0].tolist()[0]
         embedding = [float(value) for value in embedding]
         movie['embedding'] = embedding
-        await Embedded_movies2.insert_one(movie)
+        await Embedded_movies.insert_one(movie)
         if embedding is None:
             print(f"Failed to embed {movie['title']}")
         else :
@@ -36,8 +35,8 @@ async def init_embeddings():
 async def rrf(request: schemas.RRFQuerySchema):
     query = request
     query = query.query
-    vector_penalty = 1
-    full_text_penalty = 10
+    vector_penalty = 3
+    full_text_penalty = 1
 
     query_embedding = get_embedding_ada([query])
     query_embedding = query_embedding[0].tolist()[0]
@@ -49,7 +48,7 @@ async def rrf(request: schemas.RRFQuerySchema):
                 "path": "embedding",
                 "queryVector": query_embedding_bson,
                 "numCandidates": 100,
-                "limit": 20
+                "limit": 10
             }
         }, 
         {
@@ -80,19 +79,69 @@ async def rrf(request: schemas.RRFQuerySchema):
         },
         {
             "$unionWith": {
-                "coll": "embedded_movies2",
+                "coll": "embedded_movies",
                 "pipeline": [
                     {
                         "$search": {
                             "index": "movie_index",
                             "phrase": {
-                                "query": query,
-                                "path": "title"
+                            "query": query,
+                            "path": "title"
                             }
+                    }
+                    }, 
+                    {
+                        "$limit": 15
+                    }, 
+                    {
+                        "$group": {
+                            "_id": None,
+                            "docs": {"$push": "$$ROOT"}
                         }
                     }, 
                     {
-                        "$limit": 20
+                        "$unwind": {
+                            "path": "$docs", 
+                            "includeArrayIndex": "rank"
+                        }
+                    }, 
+                    {
+                        "$addFields": {
+                            "fts_score": {
+                                "$divide": [
+                                    1.0,
+                                    {"$add": ["$rank", full_text_penalty, 1]}
+                                ]
+                            }
+                        }
+                    },
+                    {
+                        "$project": {
+                            "fts_score": 1,
+                            "_id": "$docs._id",
+                            "title": "$docs.title"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "$unionWith": {
+                "coll": "embedded_movies",
+                "pipeline": [
+                    {
+                        "$search": {
+                            "index": "movie_index",
+                            "phrase": {
+                            "query": query,
+                            "path": {
+                                "wildcard":"*"
+                            }
+                            }
+                    }
+                    }, 
+                    {
+                        "$limit": 15
                     }, 
                     {
                         "$group": {
@@ -151,9 +200,9 @@ async def rrf(request: schemas.RRFQuerySchema):
             }
         },
         {"$sort": {"score": -1}},
-        {"$limit": 10}
+        {"$limit": 20}
     ]
-    results = await Embedded_movies2.aggregate(query_vector).to_list(10)
+    results = await Embedded_movies.aggregate(query_vector).to_list(20)
     response = []
     for result in results:
         result["_id"] = str(result["_id"])
@@ -192,7 +241,7 @@ async def sem_search(request: schemas.RRFQuerySchema):
     }
     ]
 
-    results = await Embedded_movies2.aggregate(pipeline).to_list(10)
+    results = await Embedded_movies.aggregate(pipeline).to_list(10)
     response = []
     for result in results:
         result["_id"] = str(result["_id"])

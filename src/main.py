@@ -19,6 +19,8 @@ app.include_router(cast.router,tags=["Cast and Director"])
 app.include_router(genre.router, tags=["Genre"])
 app.include_router(countries.router, tags=["Country Top"])
 app.include_router(auth.router, tags=["Auth"])
+app.include_router(embeddings.router, tags=["Embeddings"])
+
 @app.get("/")
 async def root():
     return {"message": "Hello World"}
