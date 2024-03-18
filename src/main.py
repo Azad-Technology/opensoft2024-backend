@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from src.config import config
 from src.db import db
-from src.routers import movie,cast,genre, auth,embeddings,countries
+from src.routers import movie,cast,genre, auth,embeddings,countries,update_info
 app = FastAPI()
 
 
@@ -19,6 +19,7 @@ app.include_router(cast.router,tags=["Cast and Director"])
 app.include_router(genre.router, tags=["Genre"])
 app.include_router(countries.router, tags=["Country Top"])
 app.include_router(auth.router, tags=["Auth"])
+app.include_router(update_info.router, tags=["Update Info"])
 @app.get("/")
 async def root():
     return {"message": "Hello World"}

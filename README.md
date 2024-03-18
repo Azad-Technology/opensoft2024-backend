@@ -432,3 +432,41 @@ project_root
   }
   ]
   ```
+
+  **Update user password**:
+  Endpoint: `GET /countries_top/{country_name}/?count={count}`
+
+  Response:
+
+  ```json5
+  [
+    {
+      message: "Password updated successfully.",
+      user: {
+        _id: "65f80524e83724b666e03962",
+        name: "Warrior",
+        email: "warrior@example.com",
+        password: "$2b$12$oiGs4x3erffC/O56CxUA6ec.awL6SDvkcRdUb4O1TX60Td3vafPci",
+      },
+    },
+  ]
+  ```
+
+  **Update user email and password**:
+  Endpoint: `GET /countries_top/{country_name}/?count={count}`
+
+  Response:
+
+  ```json5
+  [
+    {
+      message: "Email updated successfully.",
+      user: {
+        _id: "65f80524e83724b666e03962",
+        name: "Warrior",
+        email: "warrior@example.com",
+        password: "$2b$12$oiGs4x3erffC/O56CxUA6ec.awL6SDvkcRdUb4O1TX60Td3vafPci",
+      },
+    },
+  ]
+  ```
