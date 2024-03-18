@@ -13,7 +13,7 @@ router=APIRouter()
 @router.get('/autosearch/{arg}')
 async def auto_search_movie(arg: str):
     print(arg)
-    key=arg+'auto'
+    key=arg+'@'+'auto'
     value = r.get(key)
     print(value)
     if value:
@@ -95,7 +95,7 @@ async def auto_search_movie(arg: str):
 
 @router.get('/fuzzysearch/{arg}')
 async def fuzzy_search_movie(arg: str,tag: str):
-    key=arg+'fuzzy'+tag
+    key=arg+'@'+'fuzzy'+'@'+tag
     value = r.get(key)
     if value:
         return value
