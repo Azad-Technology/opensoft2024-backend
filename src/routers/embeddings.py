@@ -8,7 +8,9 @@ router = APIRouter()
 from bson.objectid import ObjectId
 from src.utils.ada_embedder import embed_movie as embed_movie_ada, get_embedding as get_embedding_ada
 from src.db import Movies, Embedded_movies
+import redis,json
 
+r = redis.Redis(host=config['REDIS_URL'],port=config['TTL_PORT'], decode_responses=True)
 
 @router.get("/init_embeddings")
 async def init_embeddings():
@@ -37,7 +39,13 @@ async def rrf(request: schemas.RRFQuerySchema):
     query = query.query
     vector_penalty = 3
     full_text_penalty = 1
-
+    
+    key=query+'@rrf'
+    value = r.get(key)
+    print(value)
+    if value:
+        return value
+    
     query_embedding = get_embedding_ada([query])
     query_embedding = query_embedding[0].tolist()[0]
     query_embedding_bson = [float(value) for value in query_embedding]
@@ -212,6 +220,7 @@ async def rrf(request: schemas.RRFQuerySchema):
             "vs_score": result['vs_score'],
             "fts_score": result['fts_score']
         })
+    r.set(key,json.dumps(response))
     return response
 
 
@@ -222,6 +231,13 @@ async def sem_search(request: schemas.RRFQuerySchema):
     query_vector = get_embedding_ada([query])  
     query_vector = query_vector[0].tolist()[0]
     query_vector_bson = [float(value) for value in query_vector]
+    
+    key=query+'@sem'
+    value = r.get(key)
+    print(value)
+    if value:
+        return value
+    
     pipeline = [
     {
         '$vectorSearch': {
@@ -250,4 +266,5 @@ async def sem_search(request: schemas.RRFQuerySchema):
             "title": movie['title'],
             "_id": str(movie['_id'])
         })
+    r.set(key,response)
     return response
