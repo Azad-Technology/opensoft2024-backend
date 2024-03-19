@@ -45,3 +45,11 @@ class MovieEmbedSchema(BaseModel):
 
 class RRFQuerySchema(BaseModel):
     query: str
+
+class UpdateUserDetails(BaseModel):
+    new_pass: Optional[str]
+    new_email: Optional[EmailStr]
+
+class CommentSchema(BaseModel):
+    comment: str
+    movie_name: str
