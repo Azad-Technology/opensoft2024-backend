@@ -16,8 +16,7 @@ router=APIRouter()
 async def get_movie_by_genre(genre_name:str):
     try:
         projection={"_id":1, "title":1, "poster":1, "released": 1, "runtime":1, 'imdb':1, 'tomatoes':1}
-        movies = await Movies.find({"genres": {'$in':[genre_name]}}, projection).to_list(length = None)
-        movies = await Movies.find({"genres": {'$in':[genre_name]}}, projection).to_list(length = None)
+        movies = await Movies.find({"genres": {'$in':[genre_name]}}, projection).limit(15).to_list(length = None)
         ret=[]
         
         if movies:

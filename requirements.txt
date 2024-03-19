@@ -57,3 +57,5 @@ triton==2.2.0
 typing_extensions==4.10.0
 urllib3==2.2.1
 uvicorn==0.28.0
+geoip2==4.8.0
+pycountry==23.12.11
