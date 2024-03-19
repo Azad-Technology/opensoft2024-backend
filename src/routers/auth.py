@@ -11,7 +11,7 @@ router = APIRouter()
 from bson.objectid import ObjectId
 from src.db import Users
 
-@router.post("/signup")
+@router.post("/signup/")
 async def signup(request: schemas.UserSignupSchema):
     hashed_password = bcrypt.hashpw(request.password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
     db_user = await User.find_one({"email": request.email.lower()})
@@ -35,7 +35,7 @@ async def signup(request: schemas.UserSignupSchema):
     # return {"message": "User created successfully.", "user": user}
 
 
-@router.post('/login')
+@router.post('/login/')
 async def login(payload: schemas.UserLoginSchema):
     db_user = await User.find_one({'email': payload.email.lower()})
     # print(db_user)
