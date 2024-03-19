@@ -76,6 +76,17 @@ project_root
   }
   ```
 
+  Response:
+
+  ```json5
+  {
+    "status": "success",
+    "message": "User created successfully.",
+    "token": {jwt_token},
+    "type": "Basic"
+  }
+  ```
+
 - **User Login**:
   Endpoint: `POST /login`
 
@@ -93,7 +104,8 @@ project_root
   ```json5
   {
     "status": "success",
-    "token": {jwt_token}
+    "token": {jwt_token},
+    "type": {subtype}
   }
   ```
 
@@ -242,39 +254,11 @@ project_root
       }
   },
   ...
-  {
-      "_id": "573a1393f29313caabcdcc03",
-      "runtime": 124,
-      "poster": "https://m.media-amazon.com/images/M/MV5BMjU0MDY5OWEtNmMzNC00ZTJmLWIxNmMtM2U3NWNmNTY5ODA5XkEyXkFqcGdeQXVyMDI2NDg0NQ@@._V1_SY1000_SX677_AL_.jpg",
-      "title": "Air Force",
-      "released": "1943-03-20T00:00:00",
-      "imdb": {
-          "rating": 7.1,
-          "votes": 2040,
-          "id": 35616
-      },
-      "tomatoes": {
-          "viewer": {
-              "rating": 3.6,
-              "numReviews": 372,
-              "meter": 70
-          },
-          "dvd": "2007-06-05T00:00:00",
-          "critic": {
-              "rating": 7.6,
-              "numReviews": 8,
-              "meter": 88
-          },
-          "lastUpdated": "2015-09-10T18:52:13",
-          "rotten": 1,
-          "production": "WARNER BROTHERS PICTURES",
-          "fresh": 7
-      }
-  }
+
   ]
   ```
 
-- **Get top count number of movies by imdb rating**:
+- **Get top count number of series by imdb rating**:
   Endpoint: `GET /imdb/?count={count}`
 
   Response:
@@ -302,32 +286,35 @@ project_root
       }
   },
   ...
-  {
-      "_id": "573a13b8f29313caabd4c241",
-      "runtime": 60,
-      "poster": "https://m.media-amazon.com/images/M/MV5BNmZlYzIzMTItY2EzYS00YTEyLTg0ZjEtMDMzZjM3ODdhN2UzXkEyXkFqcGdeQXVyNjI0MDg2NzE@._V1_SY1000_SX677_AL_.jpg",
-      "title": "Planet Earth",
-      "released": "2007-03-25T00:00:00",
-      "imdb": {
-          "rating": 9.5,
-          "votes": 82896,
-          "id": 795176
-      },
-      "tomatoes": {
-          "viewer": {
-              "rating": 3.6,
-              "numReviews": 4942,
-              "meter": 73
-          },
-          "dvd": "2006-01-01T00:00:00",
-          "production": "LionsGate Entertainment",
-          "lastUpdated": "2015-08-05T18:32:09"
-      }
-  }
+
   ]
   ```
 
-- **Get top count number of movies in for a genre**:
+  - **Get top count number of movies by imdb rating**:
+    Endpoint: `GET /imdb/?count={count}`
+
+  Response:
+
+  ```json5
+  [
+   {
+        "_id": "573a13f0f29313caabdda542",
+        "runtime": 78,
+        "poster": "https://m.media-amazon.com/images/M/MV5BMTU4MTcwMzU5Ml5BMl5BanBnXkFtZTgwOTQwMzM2NDE@._V1_SY1000_SX677_AL_.jpg",
+        "title": "A Brave Heart: The Lizzie Velasquez Story",
+        "released": "2015-09-25T00:00:00",
+        "imdb": {
+            "rating": 9.4,
+            "votes": 45,
+            "id": 3735302
+        }
+   }
+  ...
+
+  ]
+  ```
+
+- **Get top count number of series for a genre**:
   Endpoint: `GET /genre_top/{genre_name}/?count={count}`
 
   Response:
@@ -355,32 +342,67 @@ project_root
       }
   },
   ...
-  {
-      "_id": "573a13b8f29313caabd4c241",
-      "runtime": 60,
-      "poster": "https://m.media-amazon.com/images/M/MV5BNmZlYzIzMTItY2EzYS00YTEyLTg0ZjEtMDMzZjM3ODdhN2UzXkEyXkFqcGdeQXVyNjI0MDg2NzE@._V1_SY1000_SX677_AL_.jpg",
-      "title": "Planet Earth",
-      "released": "2007-03-25T00:00:00",
-      "imdb": {
-          "rating": 9.5,
-          "votes": 82896,
-          "id": 795176
-      },
-      "tomatoes": {
-          "viewer": {
-              "rating": 3.6,
-              "numReviews": 4942,
-              "meter": 73
-          },
-          "dvd": "2006-01-01T00:00:00",
-          "production": "LionsGate Entertainment",
-          "lastUpdated": "2015-08-05T18:32:09"
-      }
-  }
+
   ]
   ```
 
-  **Get top count number of movies in a country**:
+  - **Get top count number of series or movies for a genre**:
+    Endpoint: `GET /genre_top/{genre_name}/?count={count}`
+
+  Response:
+
+  ```json5
+  [
+   {
+      "_id": "573a139ff29313caabd003c4",
+      "runtime": 705,
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTI3ODc2ODc0M15BMl5BanBnXkFtZTYwMjgzNjc3._V1_SY1000_SX677_AL_.jpg",
+      "title": "Band of Brothers",
+      "released": "2001-09-09T00:00:00",
+      "imdb": {
+          "rating": 9.6,
+          "votes": 183802,
+          "id": 185906
+      },
+      "tomatoes": {
+          "viewer": {
+              "rating": 2.0,
+              "numReviews": 15
+          },
+          "dvd": "2009-03-17T00:00:00",
+          "lastUpdated": "2015-09-12T17:15:33"
+      }
+  },
+  ...
+
+  ]
+  ```
+
+- **Get top count number of movies for a genre**:
+  Endpoint: `GET /genre_top/{genre_name}/?count={count}`
+
+  Response:
+
+  ```json5
+  [
+   {
+        "_id": "573a13f0f29313caabdda542",
+        "runtime": 78,
+        "poster": "https://m.media-amazon.com/images/M/MV5BMTU4MTcwMzU5Ml5BMl5BanBnXkFtZTgwOTQwMzM2NDE@._V1_SY1000_SX677_AL_.jpg",
+        "title": "A Brave Heart: The Lizzie Velasquez Story",
+        "released": "2015-09-25T00:00:00",
+        "imdb": {
+            "rating": 9.4,
+            "votes": 45,
+            "id": 3735302
+        }
+   },
+  ...
+
+  ]
+  ```
+
+  **Get top count number of movies or series in a country**:
   Endpoint: `GET /countries_top/{country_name}/?count={count}`
 
   Response:
@@ -408,33 +430,68 @@ project_root
       }
   },
   ...
-  {
-      "_id": "573a1398f29313caabcebc0b",
-      "runtime": 680,
-      "poster": "https://m.media-amazon.com/images/M/MV5BZDc1NzI2MGEtZDA2Yy00ZWExLTgwYmItNjU3N2QyYmM0MzYwXkEyXkFqcGdeQXVyNTA4NzY1MzY@._V1_SY1000_SX677_AL_.jpg",
-      "title": "The Civil War",
-      "released": "1990-09-23T00:00:00",
-      "imdb": {
-          "rating": 9.4,
-          "votes": 4625,
-          "id": 98769
-      },
-      "tomatoes": {
-          "viewer": {
-              "rating": 3.2,
-              "numReviews": 466,
-              "meter": 56
-          },
-          "dvd": "2006-01-10T00:00:00",
-          "production": "Pet Fly Productions",
-          "lastUpdated": "2015-08-25T19:21:52"
-      }
-  }
+
   ]
   ```
 
-  **Update user password**:
-  Endpoint: `GET /countries_top/{country_name}/?count={count}`
+  - **Get top count number of series in a country**:
+    Endpoint: `GET /genre_top/{genre_name}/?count={count}`
+
+  Response:
+
+  ```json5
+  [
+   {
+      "_id": "573a139ff29313caabd003c4",
+      "runtime": 705,
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTI3ODc2ODc0M15BMl5BanBnXkFtZTYwMjgzNjc3._V1_SY1000_SX677_AL_.jpg",
+      "title": "Band of Brothers",
+      "released": "2001-09-09T00:00:00",
+      "imdb": {
+          "rating": 9.6,
+          "votes": 183802,
+          "id": 185906
+      },
+      "tomatoes": {
+          "viewer": {
+              "rating": 2.0,
+              "numReviews": 15
+          },
+          "dvd": "2009-03-17T00:00:00",
+          "lastUpdated": "2015-09-12T17:15:33"
+      }
+  },
+  ...
+
+  ]
+  ```
+
+- **Get top count number of movies in a genre**:
+  Endpoint: `GET /genre_top/{genre_name}/?count={count}`
+
+  Response:
+
+  ```json5
+  [
+   {
+        "_id": "573a13f0f29313caabdda542",
+        "runtime": 78,
+        "poster": "https://m.media-amazon.com/images/M/MV5BMTU4MTcwMzU5Ml5BMl5BanBnXkFtZTgwOTQwMzM2NDE@._V1_SY1000_SX677_AL_.jpg",
+        "title": "A Brave Heart: The Lizzie Velasquez Story",
+        "released": "2015-09-25T00:00:00",
+        "imdb": {
+            "rating": 9.4,
+            "votes": 45,
+            "id": 3735302
+        }
+   },
+  ...
+
+  ]
+  ```
+
+  **Update user email and password**:
+  Endpoint: `PATCH /update_user/?new_email={new_email}&new_pass={new_pass}`
 
   Response:
 
@@ -452,20 +509,57 @@ project_root
   ]
   ```
 
-  **Update user email and password**:
-  Endpoint: `GET /countries_top/{country_name}/?count={count}`
+  **Create comment**:
+  Endpoint: `POST /comment`
+
+  Request:
+
+  ```json5
+  {
+    "movie_name": str,
+    "comment": str
+  }
+  ```
+
+  **Update user subscription**:
+  Endpoint: `PATCH /update_subs/{new_subscription}`
 
   Response:
 
   ```json5
   [
     {
-      message: "Email updated successfully.",
+      message: "Your subscription has been changed from Basic to Gold .",
       user: {
         _id: "65f80524e83724b666e03962",
         name: "Warrior",
-        email: "warrior@example.com",
-        password: "$2b$12$oiGs4x3erffC/O56CxUA6ec.awL6SDvkcRdUb4O1TX60Td3vafPci",
+        email: "shv1@example.com",
+        password: "Example@password2",
+        last_change: "2024-03-18",
+        role: "user",
+        subtype: "Gold",
+      },
+    },
+  ]
+  ```
+
+  **Cancel user subscription**:
+  Endpoint: `PATCH /cancel_subs`
+
+  Response:
+
+  ```json5
+  [
+    {
+      message: "Your subscription has been changed from Gold to Basic .",
+      user: {
+        _id: "65f80524e83724b666e03962",
+        name: "Warrior",
+        email: "shv1@example.com",
+        password: "Example@password2",
+        last_change: "2024-03-18",
+        role: "user",
+        subtype: "Basic",
       },
     },
   ]
