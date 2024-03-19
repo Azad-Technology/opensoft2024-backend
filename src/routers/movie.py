@@ -28,7 +28,7 @@ async def get_movie(movie_id: str):
 
 
 
-@router.get('/top_series')     #name has to be changed
+@router.get('/top_series/')     #name has to be changed
 async def get_series( count: Optional[int] = 10):
     
     try:
@@ -82,7 +82,7 @@ async def get_series( count: Optional[int] = 10):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.get('/top_movies')     #name has to be changed
+@router.get('/top_movies/')     #name has to be changed
 async def get_top_movies( count: Optional[int] = 10):
     
     try:
@@ -165,7 +165,7 @@ async def get_movies( count: Optional[int] = 10):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get('/movies/{movie_id}/related_movies')
+@router.get('/movies/{movie_id}/related_movies/')
 async def get_related_movies(movie_id: str, count: Optional[int]=10):
 
     try:

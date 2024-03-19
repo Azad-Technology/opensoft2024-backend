@@ -9,7 +9,7 @@ from src.schemas import UpdateUserDetails, CommentSchema
 
 router = APIRouter()
 
-@router.patch("/update_user")
+@router.patch("/update_user/")
 async def update_info(request: UpdateUserDetails , user: dict = Depends(get_current_user)):
     update_fields = {}
     if "new_email" in request.dict():
@@ -21,7 +21,7 @@ async def update_info(request: UpdateUserDetails , user: dict = Depends(get_curr
     return {"message": "User updated successfully.", "user": user}
 
 
-@router.post("/comment")
+@router.post("/comment/")
 async def comment(request: CommentSchema, user: dict = Depends(get_current_user)):
     movie = await Movies.find_one({"title": request.movie_name})
     if not movie:
@@ -41,15 +41,7 @@ async def comment(request: CommentSchema, user: dict = Depends(get_current_user)
     return {"message": "Comment added successfully."}
     
 
-
-from fastapi import APIRouter, HTTPException
-from src.db import Users
-from bson import ObjectId
-
-
-router = APIRouter()
-
-@router.patch('/cancel_subs')
+@router.patch('/cancel_subs/')
 async def cancel_subscription( user: dict = Depends(get_current_user)):
     
         subtype = user["subtype"]
@@ -68,7 +60,7 @@ async def cancel_subscription( user: dict = Depends(get_current_user)):
     
 
     
-@router.patch('/update_subs/{new_subscription}')
+@router.patch('/update_subs/{new_subscription}/')
 async def update_subscription_patch( new_subscription: str,user: dict = Depends(get_current_user)):
     try:
             current_subscription = user["subtype"]
