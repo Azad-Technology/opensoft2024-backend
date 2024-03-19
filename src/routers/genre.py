@@ -7,6 +7,7 @@ from src.config import config
 from bson.objectid import ObjectId
 from pymongo import DESCENDING
 from typing import Optional
+from datetime import datetime
 
 router=APIRouter()
 
@@ -22,7 +23,10 @@ async def get_movie_by_genre(genre_name:str):
             for movie in movies:
                 if '_id' in movie:
                     movie['_id']=str(movie['_id'])
+                if 'released' in movie:
+                    movie['released']=movie['released'].strftime('%Y-%m-%d %H:%M:%S')
                 ret.append(movie)
+                
         return ret
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -77,6 +81,8 @@ async def get_movies_gtop(genre_name:str,  count: Optional[int] = 10):
         if movies:
             for movie in movies:
                  movie['_id']= str(movie['_id'])
+            if 'released' in movie:
+                    movie['released']=movie['released'].strftime('%Y-%m-%d %H:%M:%S')
             return movies
         return []
     except Exception as e:
