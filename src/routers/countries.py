@@ -45,7 +45,7 @@ async def get_movies_from_country(country_name:str, count: Optional[int] = 10):
                     "released": 1,
                     "runtime": 1,
                     "imdb": 1,
-                    "tomatoes": 1
+                    
                 }
             },
             {
@@ -60,7 +60,9 @@ async def get_movies_from_country(country_name:str, count: Optional[int] = 10):
         movies = await movies_cur.to_list(length=None)
         if movies:
             for movie in movies:
-                 movie['_id']= str(movie['_id'])
+                movie['_id']= str(movie['_id'])
+                if 'released' in movie:
+                    movie['released']=movie['released'].strftime('%Y-%m-%d %H:%M:%S')
             return movies
         return []
     except Exception as e:
@@ -162,7 +164,6 @@ async def get_movies(country_name:str, count: Optional[int] = 10):
                     "released": 1,
                     "runtime": 1,
                     "imdb": 1,
-                    "tomatoes": 1
                 }
             },
             {
@@ -177,7 +178,10 @@ async def get_movies(country_name:str, count: Optional[int] = 10):
         movies = await movies_cur.to_list(length=None)
         if movies:
             for movie in movies:
-                 movie['_id']= str(movie['_id'])
+                movie['_id']= str(movie['_id'])
+                if 'released' in movie:
+                    movie['released']=movie['released'].strftime('%Y-%m-%d %H:%M:%S')
+            
             return movies
         return []
     except Exception as e:
@@ -219,7 +223,6 @@ async def get_movies(country_name:str, count: Optional[int] = 10):
                     "released": 1,
                     "runtime": 1,
                     "imdb": 1,
-                    "tomatoes": 1
                 }
             },
             {
@@ -234,7 +237,9 @@ async def get_movies(country_name:str, count: Optional[int] = 10):
         movies = await movies_cur.to_list(length=None)
         if movies:
             for movie in movies:
-                 movie['_id']= str(movie['_id'])
+                movie['_id']= str(movie['_id'])
+                if 'released' in movie:
+                    movie['released']=movie['released'].strftime('%Y-%m-%d %H:%M:%S')
             return movies
         return []
     except Exception as e:
