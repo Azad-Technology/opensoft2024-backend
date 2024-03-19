@@ -9,4 +9,8 @@ config = {
     'DATABASE_URL':os.getenv('DATABASE_URL'),
     'JWT_KEY':os.getenv('JWT_KEY'),
     'CORS_ORIGINS':os.getenv('CORS_ORIGINS'),
+    'REDIS_URL':os.getenv('REDIS_URL'),
+    'DEFAULT_TTL':5,
+    'PASSWORD_REDIS':os.getenv('PASSWORD_REDIS'),
+    'TTL_PORT':os.getenv('TTL_PORT')
 }

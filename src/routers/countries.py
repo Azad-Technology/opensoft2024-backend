@@ -65,7 +65,6 @@ async def get_movies_from_country(country_name:str, count: Optional[int] = 10):
         return []
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-                
 
 def get_location_from_ip(ip_address):
     try:
@@ -127,3 +126,117 @@ async def get_movie_in_my_region(request:Request,count: Optional[int]=10, ip: Op
             raise HTTPException(status_code=404, detail='Address not found')
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@router.get('/countries_top_movies/{country_name}')       #region name case insensitive , count should be optional
+async def get_movies(country_name:str, count: Optional[int] = 10):
+    
+    try:
+
+        if count<1:
+           return []
+        default_value = 2
+
+        pipeline = [
+            {
+                "$addFields": {
+                    "imdb.rating": {
+                        "$cond": [
+                            { "$eq": ["$imdb.rating", ""] },
+                            default_value,
+                            "$imdb.rating"
+                        ]
+                    }
+                }
+            },
+            {
+                "$match": {
+                    "countries": {'$regex': f'^{country_name}$', '$options': 'i'},
+                    "type": "movie"
+                }
+            },
+            {
+                "$project": {
+                    "_id": 1,
+                    "title": 1,
+                    "poster": 1,
+                    "released": 1,
+                    "runtime": 1,
+                    "imdb": 1,
+                    "tomatoes": 1
+                }
+            },
+            {
+                "$sort": {"imdb.rating": -1}
+            },
+            {
+                "$limit": count
+            }
+        ]
+
+        movies_cur = Movies.aggregate(pipeline)  # handle empty strings
+        movies = await movies_cur.to_list(length=None)
+        if movies:
+            for movie in movies:
+                 movie['_id']= str(movie['_id'])
+            return movies
+        return []
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+                
+
+@router.get('/countries_top_series/{country_name}')       #region name case insensitive , count should be optional
+async def get_movies(country_name:str, count: Optional[int] = 10):
+    
+    try:
+
+        if count<1:
+           return []
+        default_value = 2
+
+        pipeline = [
+            {
+                "$addFields": {
+                    "imdb.rating": {
+                        "$cond": [
+                            { "$eq": ["$imdb.rating", ""] },
+                            default_value,
+                            "$imdb.rating"
+                        ]
+                    }
+                }
+            },
+            {
+                "$match": {
+                    "countries": {'$regex': f'^{country_name}$', '$options': 'i'},
+                    "type": "series"
+                }
+            },
+            {
+                "$project": {
+                    "_id": 1,
+                    "title": 1,
+                    "poster": 1,
+                    "released": 1,
+                    "runtime": 1,
+                    "imdb": 1,
+                    "tomatoes": 1
+                }
+            },
+            {
+                "$sort": {"imdb.rating": -1}
+            },
+            {
+                "$limit": count
+            }
+        ]
+
+        movies_cur = Movies.aggregate(pipeline)  # handle empty strings
+        movies = await movies_cur.to_list(length=None)
+        if movies:
+            for movie in movies:
+                 movie['_id']= str(movie['_id'])
+            return movies
+        return []
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
