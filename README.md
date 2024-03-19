@@ -110,7 +110,7 @@ project_root
   ```
 
 - **Get Movie by ID**:
-  Endpoint: `GET /movies/{_id}`
+  Endpoint: `GET /movies/{movie_id}`
 
   Response:
 
@@ -159,7 +159,7 @@ project_root
   ```
 
 - **Get Movie by Director**:
-  Endpoint: `GET /director/{director_name}`
+  Endpoint: `GET /director/{director_name}/?count=3`
 
   Response:
 
@@ -189,7 +189,7 @@ project_root
   ```
 
 - **Get Movie by cast**:
-  Endpoint: `GET /cast/{cast_name}`
+  Endpoint: `GET /cast/{cast_name}/?count=2`
 
   Response:
 
@@ -490,7 +490,7 @@ project_root
   ]
   ```
 
-  **Update user email and password**:
+- **Update user email and password**:
   Endpoint: `PATCH /update_user/?new_email={new_email}&new_pass={new_pass}`
 
   Response:
@@ -509,7 +509,7 @@ project_root
   ]
   ```
 
-  **Create comment**:
+- **Create comment**:
   Endpoint: `POST /comment`
 
   Request:
@@ -521,7 +521,7 @@ project_root
   }
   ```
 
-  **Update user subscription**:
+- **Update user subscription**:
   Endpoint: `PATCH /update_subs/{new_subscription}`
 
   Response:
@@ -543,7 +543,7 @@ project_root
   ]
   ```
 
-  **Cancel user subscription**:
+- **Cancel user subscription**:
   Endpoint: `PATCH /cancel_subs`
 
   Response:
@@ -562,5 +562,123 @@ project_root
         subtype: "Basic",
       },
     },
+  ]
+  ```
+
+- **Get recommended movies from movie id**:
+  Endpoint: `GET /movies/{movie_id}/related_movies/?count=1`
+
+  Response:
+
+  ```json5
+  [
+  {
+    "_id": "573a13a7f29313caabd1c099",
+    "imdb": {
+      "rating": 7.8,
+      "votes": 341206,
+      "id": 304141
+    },
+    "genres": [
+      "Adventure",
+      "Family",
+      "Fantasy"
+    ],
+    "title": "Harry Potter and the Prisoner of Azkaban",
+    "tomatoes": {
+      "website": "http://azkaban.warnerbros.com/",
+      "viewer": {
+        "rating": 3.8,
+        "numReviews": 1163226,
+        "meter": 86
+      },
+      "dvd": "2004-11-22T00:00:00",
+      "critic": {
+        "rating": 7.9,
+        "numReviews": 249,
+        "meter": 91
+      },
+      "boxOffice": "$249.4M",
+      "consensus": "Under the assured direction of Alfonso Cuaron, Harry Potter and the Prisoner of Azkaban triumphantly strikes a delicate balance between technical wizardry and complex storytelling.",
+      "rotten": 23,
+      "production": "Warner Bros. Pictures",
+      "lastUpdated": "2015-09-12T17:26:42",
+      "fresh": 226
+    },
+    "poster": "https://m.media-amazon.com/images/M/MV5BMTY4NTIwODg0N15BMl5BanBnXkFtZTcwOTc0MjEzMw@@._V1_SY1000_SX677_AL_.jpg",
+    "released": "2004-06-04T00:00:00",
+    "runtime": 142,
+    "title_similarity": 4,
+    "genre_intersection": 3,
+    "cast_intersection": 0,
+    "director_intersection": 0,
+    "region_intersection": 2,
+    "relevance_score1": 8.112341772151899,
+    "relevance_score": 237.4987341772152
+  }
+  ...
+  ]
+  ```
+
+  - **Get comments for a movie**:
+  Endpoint: `GET /movies/573a13a3f29313caabd0d4c5/comments/?count=1`
+
+  Response:
+
+  ```json5
+  [
+  {
+    "_id": "5a9427658b0beebeb6968ea9",
+    "name": "Joffrey Baratheon",
+    "email": "jack_gleeson@gameofthron.es",
+    "movie_id": "573a13a3f29313caabd0d4c5",
+    "text": "Eos qui voluptate tempora recusandae quaerat eaque laudantium. Aliquam qui vero est suscipit. Architecto similique numquam quia placeat.",
+    "date": "2017-06-20T03:01:39"
+  }
+  ...
+  ]
+  ```
+
+  - **Get Recent Movies**:
+  Endpoint: `GET /recent_movies/?count=1`
+
+  Response:
+
+  ```json5
+  [
+  {
+    "_id": "573a13f8f29313caabde8d7a",
+    "runtime": 89,
+    "poster": "https://m.media-amazon.com/images/M/MV5BMTUzNjIyOTU1Ml5BMl5BanBnXkFtZTgwMjEzNzI2NzE@._V1_SY1000_SX677_AL_.jpg",
+    "title": "The Treasure",
+    "released": "2016-03-23T00:00:00",
+    "imdb": {
+      "rating": 7.5,
+      "votes": 217,
+      "id": 4515684
+    }
+  }
+  ]
+  ```
+
+  - **Get movies from user's country**:
+  Endpoint : `/my_country/?ip=8.8.8.8&count=3`
+
+  Response:
+
+  ```json5
+  [
+  {
+    "_id": "573a13adf29313caabd2af91",
+    "runtime": 160,
+    "title": "Love is God",
+    "released": "2003-01-14T00:00:00",
+    "imdb": {
+      "rating": 8.9,
+      "votes": 4584,
+      "id": 367495
+    }
+  }
+  ...
   ]
   ```
