@@ -239,4 +239,3 @@ async def get_movies(country_name:str, count: Optional[int] = 10):
         return []
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-

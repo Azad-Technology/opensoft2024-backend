@@ -83,7 +83,7 @@ async def get_series( count: Optional[int] = 10):
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get('/top_movies')     #name has to be changed
-async def get_series( count: Optional[int] = 10):
+async def get_top_movies( count: Optional[int] = 10):
     
     try:
         if count<1:
@@ -362,4 +362,3 @@ async def get_related_movies(movie_id: str, count: Optional[int]=10):
             
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-

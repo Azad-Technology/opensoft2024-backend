@@ -13,4 +13,3 @@ config = {
     'DEFAULT_TTL':5,
     'PASSWORD_REDIS':os.getenv('PASSWORD_REDIS'),
     'TTL_PORT':os.getenv('TTL_PORT')
-}
