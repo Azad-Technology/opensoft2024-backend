@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from uuid import uuid4
 
-from src.db import Movies, Comments
+from src.db import Movies, Comments, projects
 from src import schemas
 from src.config import config
 from bson.objectid import ObjectId
@@ -54,15 +54,7 @@ async def get_series( count: Optional[int] = 10):
                 }
             },
             {
-                "$project": {
-                    "_id": 1,
-                    "title": 1,
-                    "poster": 1,
-                    "released": 1,
-                    "runtime": 1,
-                    "imdb": 1,
-                    "tomatoes": 1
-                }
+                "$project": projects
             },
             {
                 "$sort": {"imdb.rating": -1}
@@ -76,7 +68,8 @@ async def get_series( count: Optional[int] = 10):
         movies = await movies_cur.to_list(length=None)
         if movies:
             for movie in movies:
-                 movie['_id']= str(movie['_id'])
+                movie['_id']= str(movie['_id'])
+                
             return movies
         return []
     except Exception as e:
@@ -108,15 +101,7 @@ async def get_top_movies( count: Optional[int] = 10):
                 }
             },
             {
-                "$project": {
-                    "_id": 1,
-                    "title": 1,
-                    "poster": 1,
-                    "released": 1,
-                    "runtime": 1,
-                    "imdb": 1,
-                    "tomatoes": 1
-                }
+                "$project": projects
             },
             {
                 "$sort": {"imdb.rating": -1}
@@ -155,7 +140,8 @@ async def get_movies( count: Optional[int] = 10):
     try:
         if count<1:
            return []
-        projection={"_id":1, "title":1, "poster":1, "released": 1, "runtime":1, 'imdb':1, 'tomatoes':1}
+        projection=projects
+        projection['released']=1
         movies_cur = Movies.find({"imdb.rating":{'$ne':''}},projection).sort([("released", -1)]).limit(count)
         movies = await movies_cur.to_list(length=None)
         for movie in movies:
@@ -210,8 +196,20 @@ async def get_related_movies(movie_id: str, count: Optional[int]=10):
                 "released": 1,
                 "runtime": 1,
                 "imdb": 1,
-                "tomatoes": 1,
+                
                 "genres": 1,
+                "poster_path":1,
+                'year':1,
+                'plot':1,
+                'languages':1,
+                'fullplot':1,
+                'languages_intersection':{
+                    "$cond": {
+                        "if": {"$and": [{"$isArray": ["$languages"]}, {"$isArray": [movie.get("languages", [])]}]},
+                        "then": {"$size": {"$setIntersection": ["$languages", movie.get("languages", [])]}},
+                        "else": 0  # Handle null or empty array
+                    }
+                },
                 "genre_intersection": {
                     "$cond": {
                         "if": {"$and": [{"$isArray": ["$genres"]}, {"$isArray": [movie.get("genres", [])]}]},
@@ -240,19 +238,22 @@ async def get_related_movies(movie_id: str, count: Optional[int]=10):
                         "else": 0  # Handle null or empty array
                     }
                 },
-                "relevance_score1": {"$meta": "textScore"},
+                "relevance_score1": {'$divide':[{"$meta": "textScore"}, {'$add':[len(movie.get('fullplot', ' ')), {'$strLenCP': {"$ifNull": ["$fullplot", " "]}}]}]},
                 "title_similarity": 1
             }},
             {"$addFields": {
                 "relevance_score": {
                     "$add": [
-                        {"$multiply": ["$genre_intersection", 5]},
-                        {"$multiply": ["$cast_intersection", 6]},
-                        {"$multiply": ["$director_intersection", 4]},
-                        {"$multiply": ["$region_intersection", 1]},
-                        {"$multiply": ["$relevance_score1", 8]},
-                        {"$multiply": ["$title_similarity", 35]},
-                        {"$multiply": ["$imdb.rating", 2]}
+                        {'$min':[{"$multiply": ["$genre_intersection", 30]},80]},
+                        {"$multiply": ["$cast_intersection", 45]},
+                        {"$multiply": ["$director_intersection", 36]},
+                        {"$multiply": ["$region_intersection", 70]},
+                        {'$min':[{"$multiply": ["$languages_intersection", 50]},70]},
+                        {"$multiply": ["$relevance_score1", 2000]},
+                        {"$multiply": ["$title_similarity", 25]},
+                        {"$multiply": ["$imdb.rating", 4]},
+                        {"$multiply": [{"$abs": {"$subtract":[movie.get('year', 2000) , "$year"]}}, -1]},
+                        
                     ]
                 }
             }},
@@ -265,6 +266,8 @@ async def get_related_movies(movie_id: str, count: Optional[int]=10):
             if movie_:
                 if '_id' in movie_:
                     movie_['_id'] = str(movie_['_id'])
+                if 'released' in movie_:
+                    movie_['released']=''
         if similar_movies:
             return similar_movies
         # print("Not found")
@@ -303,8 +306,18 @@ async def get_related_movies(movie_id: str, count: Optional[int]=10):
                 "released": 1,
                 "runtime": 1,
                 "imdb": 1,
-                "tomatoes": 1,
                 "genres": 1,
+                "poster_path":1,
+                'year':1,
+                'plot':1,
+                'languages':1,
+                'languages_intersection':{
+                    "$cond": {
+                        "if": {"$and": [{"$isArray": ["$languages"]}, {"$isArray": [movie.get("languages", [])]}]},
+                        "then": {"$size": {"$setIntersection": ["$languages", movie.get("languages", [])]}},
+                        "else": 0  # Handle null or empty array
+                    }
+                },
                 "genre_intersection": {
                     "$cond": {
                         "if": {"$and": [{"$isArray": ["$genres"]}, {"$isArray": [movie.get("genres", [])]}]},
@@ -339,14 +352,15 @@ async def get_related_movies(movie_id: str, count: Optional[int]=10):
             {"$addFields": {
                 "relevance_score": {
                     "$add": [
-                        {"$multiply": ["$genre_intersection", 5]},
-                        {"$multiply": ["$cast_intersection", 6]},
-                        {"$multiply": ["$director_intersection", 4]},
-                        {"$multiply": ["$region_intersection", 2]},
-                        {"$multiply": ["$relevance_score1", 8]},
-                        {"$multiply": ["$title_similarity", 35]},
-                        {"$multiply": ["$imdb.rating", 2]}
-                        
+                        {'$min':[{"$multiply": ["$genre_intersection", 30]},80]},
+                        {"$multiply": ["$cast_intersection", 45]},
+                        {"$multiply": ["$director_intersection", 36]},
+                        {"$multiply": ["$region_intersection", 70]},
+                        {'$min':[{"$multiply": ["$languages_intersection", 50]},70]},
+                        {"$multiply": ["$relevance_score1", 2000]},
+                        {"$multiply": ["$title_similarity", 25]},
+                        {"$multiply": ["$imdb.rating", 4]},
+                        {"$multiply": [{"$abs": {"$subtract":[movie.get('year', 2000) , "$year"]}}, -1]}, 
                     ]
                 }
             }},
@@ -358,6 +372,8 @@ async def get_related_movies(movie_id: str, count: Optional[int]=10):
             if movie:
                 if '_id' in movie:
                     movie['_id'] = str(movie['_id'])
+                if 'released' in movie:
+                    movie['released']=''
         return similar_movies
             
     except Exception as e:

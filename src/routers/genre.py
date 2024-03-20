@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from uuid import uuid4
 
-from src.db import Movies
+from src.db import Movies, projects
 from src import schemas
 from src.config import config
 from bson.objectid import ObjectId
@@ -15,7 +15,7 @@ router=APIRouter()
 @router.get('/genre/{genre_name}/')
 async def get_movie_by_genre(genre_name:str):
     try:
-        projection={"_id":1, "title":1, "poster":1, "released": 1, "runtime":1, 'imdb':1, 'tomatoes':1}
+        projection=projects
         movies = await Movies.find({"genres": {'$in':[genre_name]}}, projection).limit(15).to_list(length = None)
         ret=[]
         
@@ -23,8 +23,6 @@ async def get_movie_by_genre(genre_name:str):
             for movie in movies:
                 if '_id' in movie:
                     movie['_id']=str(movie['_id'])
-                if 'released' in movie:
-                    movie['released']=movie['released'].strftime('%Y-%m-%d %H:%M:%S')
                 ret.append(movie)
                 
         return ret
@@ -58,15 +56,7 @@ async def get_movies_gtop(genre_name:str,  count: Optional[int] = 10):
                 }
             },
             {
-                "$project": {
-                    "_id": 1,
-                    "title": 1,
-                    "poster": 1,
-                    "released": 1,
-                    "runtime": 1,
-                    "imdb": 1,
-                    "tomatoes": 1
-                }
+                "$project": projects
             },
             {
                 "$sort": {"imdb.rating": -1}
@@ -80,9 +70,8 @@ async def get_movies_gtop(genre_name:str,  count: Optional[int] = 10):
         movies = await movies_cur.to_list(length=None)
         if movies:
             for movie in movies:
-                 movie['_id']= str(movie['_id'])
-            if 'released' in movie:
-                    movie['released']=movie['released'].strftime('%Y-%m-%d %H:%M:%S')
+                movie['_id']= str(movie['_id'])
+                
             return movies
         return []
     except Exception as e:
@@ -116,15 +105,7 @@ async def get_movies(genre_name:str,  count: Optional[int] = 10):
                 }
             },
             {
-                "$project": {
-                    "_id": 1,
-                    "title": 1,
-                    "poster": 1,
-                    "released": 1,
-                    "runtime": 1,
-                    "imdb": 1,
-                    "tomatoes": 1
-                }
+                "$project": projects
             },
             {
                 "$sort": {"imdb.rating": -1}
@@ -138,7 +119,8 @@ async def get_movies(genre_name:str,  count: Optional[int] = 10):
         movies = await movies_cur.to_list(length=None)
         if movies:
             for movie in movies:
-                 movie['_id']= str(movie['_id'])
+                movie['_id']= str(movie['_id'])
+                
             return movies
         return []
     except Exception as e:
@@ -172,15 +154,7 @@ async def get_movies_gts(genre_name:str,  count: Optional[int] = 10):
                 }
             },
             {
-                "$project": {
-                    "_id": 1,
-                    "title": 1,
-                    "poster": 1,
-                    "released": 1,
-                    "runtime": 1,
-                    "imdb": 1,
-                    "tomatoes": 1
-                }
+                "$project": projects
             },
             {
                 "$sort": {"imdb.rating": -1}
@@ -195,9 +169,9 @@ async def get_movies_gts(genre_name:str,  count: Optional[int] = 10):
         if movies:
             for movie in movies:
                  movie['_id']= str(movie['_id'])
+                 
             return movies
         return []
-        return ret
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

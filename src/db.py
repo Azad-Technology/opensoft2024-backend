@@ -21,5 +21,15 @@ Theaters = db.theaters
 Movies2 = db.movies2
 Embedded_movies_new = db.embedded_movies_new
 Embedded_movies2 = db.embedded_movies2
+projects={
+        "_id": 1,
+        "title": 1,
+        "poster": 1,
+        "runtime": 1,
+        "imdb": 1,
+        "poster_path":1,
+        'genres':1,
+        'year':1,
+    }
 
 
