@@ -29,6 +29,7 @@ projects={
         "runtime": 1,
         "imdb": 1,
         "poster_path":1,
+        "backdrop_path":1,
         'genres':1,
         'year':1,
     }

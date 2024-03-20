@@ -236,6 +236,7 @@ async def get_related_movies(movie_id: str, count: Optional[int]=10):
                 
                 "genres": 1,
                 "poster_path":1,
+                "backdrop_path":1,
                 'year':1,
                 'plot':1,
                 'languages':1,
@@ -346,6 +347,7 @@ async def get_related_movies(movie_id: str, count: Optional[int]=10):
                 "imdb": 1,
                 "genres": 1,
                 "poster_path":1,
+                "backdrop_path":1,
                 'year':1,
                 'plot':1,
                 'languages':1,
