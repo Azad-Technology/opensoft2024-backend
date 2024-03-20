@@ -4,4 +4,5 @@ __pycache__/
 .vercel
 src/routers/movies2.py
 test.py
-src/db.py
+genres.json
+src/db2.py

@@ -18,41 +18,50 @@ import requests
 r = redis.Redis(host='10.105.12.4',port=6379, decode_responses=True)
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
-@router.post("/signup")
+@router.post("/signup/")
 async def signup(request: schemas.UserSignupSchema):
-    hashed_password = bcrypt.hashpw(request.password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
-    db_user = await User.find_one({"email": request.email.lower()})
-    if db_user is not None:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User already exists.")
-    user = {
-        "name": request.name,
-        "email": request.email.lower(),
-        "password": hashed_password,
-    }
-    
-    await User.insert_one(user)
-    if '_id' in user:
-        user['_id'] = str(user['_id'])
-    # db_user = await User.find_one({'email': request.email.lower()})
-    # # if db_user:
-    # #     print("Found")
-    return {"message": "User created successfully.", "user": user}
+    try:
+        hashed_password = bcrypt.hashpw(request.password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+        db_user = await User.find_one({"email": request.email.lower()})
+        if db_user is not None:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User already exists.")
+        user = {
+            "name": request.name,
+            "email": request.email.lower(),
+            "password": hashed_password,
+            "subtype": "Basic",
+            "role": "user"
+        }
+        
+        await User.insert_one(user)
+        if '_id' in user:
+            _id = str(user['_id'])
+            
+
+        token = jwt.encode(payload={"user_id": str(_id)}, key=config["JWT_KEY"], algorithm="HS256")
+        return {'status': 'success',"message": "User created successfully.", 'token': token, 'type': user['subtype']}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    # return {"message": "User created successfully.", "user": user}
 
 
-@router.post('/login')
+@router.post('/login/')
 async def login(payload: schemas.UserLoginSchema):
-    db_user = await User.find_one({'email': payload.email.lower()})
-    # print(db_user)
-    if not db_user:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Incorrect email')
-    hashed_password = db_user.get('password')
-    _id = db_user.get("_id")
-    if not _id:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='User ID not found')
-    if not bcrypt.checkpw(payload.password.encode('utf-8'), hashed_password.encode('utf-8')):
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Incorrect email or password')
-    token = jwt.encode(payload={"user_id": str(_id)}, key=config["JWT_KEY"], algorithm="HS256")
-    return {'status': 'success', 'token': token}
+    try:
+        db_user = await User.find_one({'email': payload.email.lower()})
+        # print(db_user)
+        if not db_user:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='No user found!!')
+        hashed_password = db_user.get('password')
+        _id = db_user.get("_id")
+        if not _id:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='User ID not found')
+        if not bcrypt.checkpw(payload.password.encode('utf-8'), hashed_password.encode('utf-8')):
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Incorrect email or password')
+        token = jwt.encode(payload={"user_id": str(_id)}, key=config["JWT_KEY"], algorithm="HS256")
+        return {'status': 'success', 'token': token, 'type': db_user['subtype']}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 security = HTTPBearer()
 

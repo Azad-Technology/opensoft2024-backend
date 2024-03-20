@@ -76,6 +76,17 @@ project_root
   }
   ```
 
+  Response:
+
+  ```json5
+  {
+    "status": "success",
+    "message": "User created successfully.",
+    "token": {jwt_token},
+    "type": "Basic"
+  }
+  ```
+
 - **User Login**:
   Endpoint: `POST /login`
 
@@ -93,12 +104,13 @@ project_root
   ```json5
   {
     "status": "success",
-    "token": {jwt_token}
+    "token": {jwt_token},
+    "type": {subtype}
   }
   ```
 
 - **Get Movie by ID**:
-  Endpoint: `GET /movies/{_id}`
+  Endpoint: `GET /movies/{movie_id}`
 
   Response:
 
@@ -147,7 +159,7 @@ project_root
   ```
 
 - **Get Movie by Director**:
-  Endpoint: `GET /director/{director_name}`
+  Endpoint: `GET /director/{director_name}/?count=3`
 
   Response:
 
@@ -177,7 +189,7 @@ project_root
   ```
 
 - **Get Movie by cast**:
-  Endpoint: `GET /cast/{cast_name}`
+  Endpoint: `GET /cast/{cast_name}/?count=2`
 
   Response:
 
@@ -242,39 +254,11 @@ project_root
       }
   },
   ...
-  {
-      "_id": "573a1393f29313caabcdcc03",
-      "runtime": 124,
-      "poster": "https://m.media-amazon.com/images/M/MV5BMjU0MDY5OWEtNmMzNC00ZTJmLWIxNmMtM2U3NWNmNTY5ODA5XkEyXkFqcGdeQXVyMDI2NDg0NQ@@._V1_SY1000_SX677_AL_.jpg",
-      "title": "Air Force",
-      "released": "1943-03-20T00:00:00",
-      "imdb": {
-          "rating": 7.1,
-          "votes": 2040,
-          "id": 35616
-      },
-      "tomatoes": {
-          "viewer": {
-              "rating": 3.6,
-              "numReviews": 372,
-              "meter": 70
-          },
-          "dvd": "2007-06-05T00:00:00",
-          "critic": {
-              "rating": 7.6,
-              "numReviews": 8,
-              "meter": 88
-          },
-          "lastUpdated": "2015-09-10T18:52:13",
-          "rotten": 1,
-          "production": "WARNER BROTHERS PICTURES",
-          "fresh": 7
-      }
-  }
+
   ]
   ```
 
-- **Get top count number of movies by imdb rating**:
+- **Get top count number of series by imdb rating**:
   Endpoint: `GET /imdb/?count={count}`
 
   Response:
@@ -302,32 +286,35 @@ project_root
       }
   },
   ...
-  {
-      "_id": "573a13b8f29313caabd4c241",
-      "runtime": 60,
-      "poster": "https://m.media-amazon.com/images/M/MV5BNmZlYzIzMTItY2EzYS00YTEyLTg0ZjEtMDMzZjM3ODdhN2UzXkEyXkFqcGdeQXVyNjI0MDg2NzE@._V1_SY1000_SX677_AL_.jpg",
-      "title": "Planet Earth",
-      "released": "2007-03-25T00:00:00",
-      "imdb": {
-          "rating": 9.5,
-          "votes": 82896,
-          "id": 795176
-      },
-      "tomatoes": {
-          "viewer": {
-              "rating": 3.6,
-              "numReviews": 4942,
-              "meter": 73
-          },
-          "dvd": "2006-01-01T00:00:00",
-          "production": "LionsGate Entertainment",
-          "lastUpdated": "2015-08-05T18:32:09"
-      }
-  }
+
   ]
   ```
 
-- **Get top count number of movies in for a genre**:
+  - **Get top count number of movies by imdb rating**:
+    Endpoint: `GET /imdb/?count={count}`
+
+  Response:
+
+  ```json5
+  [
+   {
+        "_id": "573a13f0f29313caabdda542",
+        "runtime": 78,
+        "poster": "https://m.media-amazon.com/images/M/MV5BMTU4MTcwMzU5Ml5BMl5BanBnXkFtZTgwOTQwMzM2NDE@._V1_SY1000_SX677_AL_.jpg",
+        "title": "A Brave Heart: The Lizzie Velasquez Story",
+        "released": "2015-09-25T00:00:00",
+        "imdb": {
+            "rating": 9.4,
+            "votes": 45,
+            "id": 3735302
+        }
+   }
+  ...
+
+  ]
+  ```
+
+- **Get top count number of series for a genre**:
   Endpoint: `GET /genre_top/{genre_name}/?count={count}`
 
   Response:
@@ -355,32 +342,67 @@ project_root
       }
   },
   ...
-  {
-      "_id": "573a13b8f29313caabd4c241",
-      "runtime": 60,
-      "poster": "https://m.media-amazon.com/images/M/MV5BNmZlYzIzMTItY2EzYS00YTEyLTg0ZjEtMDMzZjM3ODdhN2UzXkEyXkFqcGdeQXVyNjI0MDg2NzE@._V1_SY1000_SX677_AL_.jpg",
-      "title": "Planet Earth",
-      "released": "2007-03-25T00:00:00",
-      "imdb": {
-          "rating": 9.5,
-          "votes": 82896,
-          "id": 795176
-      },
-      "tomatoes": {
-          "viewer": {
-              "rating": 3.6,
-              "numReviews": 4942,
-              "meter": 73
-          },
-          "dvd": "2006-01-01T00:00:00",
-          "production": "LionsGate Entertainment",
-          "lastUpdated": "2015-08-05T18:32:09"
-      }
-  }
+
   ]
   ```
 
-  **Get top count number of movies in a country**:
+  - **Get top count number of series or movies for a genre**:
+    Endpoint: `GET /genre_top/{genre_name}/?count={count}`
+
+  Response:
+
+  ```json5
+  [
+   {
+      "_id": "573a139ff29313caabd003c4",
+      "runtime": 705,
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTI3ODc2ODc0M15BMl5BanBnXkFtZTYwMjgzNjc3._V1_SY1000_SX677_AL_.jpg",
+      "title": "Band of Brothers",
+      "released": "2001-09-09T00:00:00",
+      "imdb": {
+          "rating": 9.6,
+          "votes": 183802,
+          "id": 185906
+      },
+      "tomatoes": {
+          "viewer": {
+              "rating": 2.0,
+              "numReviews": 15
+          },
+          "dvd": "2009-03-17T00:00:00",
+          "lastUpdated": "2015-09-12T17:15:33"
+      }
+  },
+  ...
+
+  ]
+  ```
+
+- **Get top count number of movies for a genre**:
+  Endpoint: `GET /genre_top/{genre_name}/?count={count}`
+
+  Response:
+
+  ```json5
+  [
+   {
+        "_id": "573a13f0f29313caabdda542",
+        "runtime": 78,
+        "poster": "https://m.media-amazon.com/images/M/MV5BMTU4MTcwMzU5Ml5BMl5BanBnXkFtZTgwOTQwMzM2NDE@._V1_SY1000_SX677_AL_.jpg",
+        "title": "A Brave Heart: The Lizzie Velasquez Story",
+        "released": "2015-09-25T00:00:00",
+        "imdb": {
+            "rating": 9.4,
+            "votes": 45,
+            "id": 3735302
+        }
+   },
+  ...
+
+  ]
+  ```
+
+  **Get top count number of movies or series in a country**:
   Endpoint: `GET /countries_top/{country_name}/?count={count}`
 
   Response:
@@ -408,27 +430,255 @@ project_root
       }
   },
   ...
-  {
-      "_id": "573a1398f29313caabcebc0b",
-      "runtime": 680,
-      "poster": "https://m.media-amazon.com/images/M/MV5BZDc1NzI2MGEtZDA2Yy00ZWExLTgwYmItNjU3N2QyYmM0MzYwXkEyXkFqcGdeQXVyNTA4NzY1MzY@._V1_SY1000_SX677_AL_.jpg",
-      "title": "The Civil War",
-      "released": "1990-09-23T00:00:00",
+
+  ]
+  ```
+
+  - **Get top count number of series in a country**:
+    Endpoint: `GET /genre_top/{genre_name}/?count={count}`
+
+  Response:
+
+  ```json5
+  [
+   {
+      "_id": "573a139ff29313caabd003c4",
+      "runtime": 705,
+      "poster": "https://m.media-amazon.com/images/M/MV5BMTI3ODc2ODc0M15BMl5BanBnXkFtZTYwMjgzNjc3._V1_SY1000_SX677_AL_.jpg",
+      "title": "Band of Brothers",
+      "released": "2001-09-09T00:00:00",
       "imdb": {
-          "rating": 9.4,
-          "votes": 4625,
-          "id": 98769
+          "rating": 9.6,
+          "votes": 183802,
+          "id": 185906
       },
       "tomatoes": {
           "viewer": {
-              "rating": 3.2,
-              "numReviews": 466,
-              "meter": 56
+              "rating": 2.0,
+              "numReviews": 15
           },
-          "dvd": "2006-01-10T00:00:00",
-          "production": "Pet Fly Productions",
-          "lastUpdated": "2015-08-25T19:21:52"
+          "dvd": "2009-03-17T00:00:00",
+          "lastUpdated": "2015-09-12T17:15:33"
       }
+  },
+  ...
+
+  ]
+  ```
+
+- **Get top count number of movies in a genre**:
+  Endpoint: `GET /genre_top/{genre_name}/?count={count}`
+
+  Response:
+
+  ```json5
+  [
+   {
+        "_id": "573a13f0f29313caabdda542",
+        "runtime": 78,
+        "poster": "https://m.media-amazon.com/images/M/MV5BMTU4MTcwMzU5Ml5BMl5BanBnXkFtZTgwOTQwMzM2NDE@._V1_SY1000_SX677_AL_.jpg",
+        "title": "A Brave Heart: The Lizzie Velasquez Story",
+        "released": "2015-09-25T00:00:00",
+        "imdb": {
+            "rating": 9.4,
+            "votes": 45,
+            "id": 3735302
+        }
+   },
+  ...
+
+  ]
+  ```
+
+- **Update user email and password**:
+  Endpoint: `PATCH /update_user/?new_email={new_email}&new_pass={new_pass}`
+
+  Response:
+
+  ```json5
+  [
+    {
+      message: "Password updated successfully.",
+      user: {
+        _id: "65f80524e83724b666e03962",
+        name: "Warrior",
+        email: "warrior@example.com",
+        password: "$2b$12$oiGs4x3erffC/O56CxUA6ec.awL6SDvkcRdUb4O1TX60Td3vafPci",
+      },
+    },
+  ]
+  ```
+
+- **Create comment**:
+  Endpoint: `POST /comment`
+
+  Request:
+
+  ```json5
+  {
+    "movie_name": str,
+    "comment": str
   }
+  ```
+
+- **Update user subscription**:
+  Endpoint: `PATCH /update_subs/{new_subscription}`
+
+  Response:
+
+  ```json5
+  [
+    {
+      message: "Your subscription has been changed from Basic to Gold .",
+      user: {
+        _id: "65f80524e83724b666e03962",
+        name: "Warrior",
+        email: "shv1@example.com",
+        password: "Example@password2",
+        last_change: "2024-03-18",
+        role: "user",
+        subtype: "Gold",
+      },
+    },
+  ]
+  ```
+
+- **Cancel user subscription**:
+  Endpoint: `PATCH /cancel_subs`
+
+  Response:
+
+  ```json5
+  [
+    {
+      message: "Your subscription has been changed from Gold to Basic .",
+      user: {
+        _id: "65f80524e83724b666e03962",
+        name: "Warrior",
+        email: "shv1@example.com",
+        password: "Example@password2",
+        last_change: "2024-03-18",
+        role: "user",
+        subtype: "Basic",
+      },
+    },
+  ]
+  ```
+
+- **Get recommended movies from movie id**:
+  Endpoint: `GET /movies/{movie_id}/related_movies/?count=1`
+
+  Response:
+
+  ```json5
+  [
+  {
+    "_id": "573a13a7f29313caabd1c099",
+    "imdb": {
+      "rating": 7.8,
+      "votes": 341206,
+      "id": 304141
+    },
+    "genres": [
+      "Adventure",
+      "Family",
+      "Fantasy"
+    ],
+    "title": "Harry Potter and the Prisoner of Azkaban",
+    "tomatoes": {
+      "website": "http://azkaban.warnerbros.com/",
+      "viewer": {
+        "rating": 3.8,
+        "numReviews": 1163226,
+        "meter": 86
+      },
+      "dvd": "2004-11-22T00:00:00",
+      "critic": {
+        "rating": 7.9,
+        "numReviews": 249,
+        "meter": 91
+      },
+      "boxOffice": "$249.4M",
+      "consensus": "Under the assured direction of Alfonso Cuaron, Harry Potter and the Prisoner of Azkaban triumphantly strikes a delicate balance between technical wizardry and complex storytelling.",
+      "rotten": 23,
+      "production": "Warner Bros. Pictures",
+      "lastUpdated": "2015-09-12T17:26:42",
+      "fresh": 226
+    },
+    "poster": "https://m.media-amazon.com/images/M/MV5BMTY4NTIwODg0N15BMl5BanBnXkFtZTcwOTc0MjEzMw@@._V1_SY1000_SX677_AL_.jpg",
+    "released": "2004-06-04T00:00:00",
+    "runtime": 142,
+    "title_similarity": 4,
+    "genre_intersection": 3,
+    "cast_intersection": 0,
+    "director_intersection": 0,
+    "region_intersection": 2,
+    "relevance_score1": 8.112341772151899,
+    "relevance_score": 237.4987341772152
+  }
+  ...
+  ]
+  ```
+
+  - **Get comments for a movie**:
+  Endpoint: `GET /movies/573a13a3f29313caabd0d4c5/comments/?count=1`
+
+  Response:
+
+  ```json5
+  [
+  {
+    "_id": "5a9427658b0beebeb6968ea9",
+    "name": "Joffrey Baratheon",
+    "email": "jack_gleeson@gameofthron.es",
+    "movie_id": "573a13a3f29313caabd0d4c5",
+    "text": "Eos qui voluptate tempora recusandae quaerat eaque laudantium. Aliquam qui vero est suscipit. Architecto similique numquam quia placeat.",
+    "date": "2017-06-20T03:01:39"
+  }
+  ...
+  ]
+  ```
+
+  - **Get Recent Movies**:
+  Endpoint: `GET /recent_movies/?count=1`
+
+  Response:
+
+  ```json5
+  [
+  {
+    "_id": "573a13f8f29313caabde8d7a",
+    "runtime": 89,
+    "poster": "https://m.media-amazon.com/images/M/MV5BMTUzNjIyOTU1Ml5BMl5BanBnXkFtZTgwMjEzNzI2NzE@._V1_SY1000_SX677_AL_.jpg",
+    "title": "The Treasure",
+    "released": "2016-03-23T00:00:00",
+    "imdb": {
+      "rating": 7.5,
+      "votes": 217,
+      "id": 4515684
+    }
+  }
+  ]
+  ```
+
+  - **Get movies from user's country**:
+  Endpoint : `GET /my_country/?ip=8.8.8.8&count=3`
+
+  Response:
+
+  ```json5
+  [
+  {
+    "_id": "573a13adf29313caabd2af91",
+    "runtime": 160,
+    "title": "Love is God",
+    "released": "2003-01-14T00:00:00",
+    "imdb": {
+      "rating": 8.9,
+      "votes": 4584,
+      "id": 367495
+    }
+  }
+  ...
   ]
   ```
