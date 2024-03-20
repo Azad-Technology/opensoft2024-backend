@@ -1,9 +1,12 @@
 from fastapi import APIRouter, HTTPException
 from uuid import uuid4
 from bson.objectid import ObjectId
-from src.db import Movies
+from src.db import Movies, projects
 from src import schemas
 from src.config import config
+import redis,json
+
+r = redis.Redis(host='10.105.12.4',port=8045, decode_responses=True)
 from typing import Optional
 
 router = APIRouter()
@@ -14,6 +17,10 @@ async def get_cast(cast_name: str, count:Optional[int]=10):
     try:
         if count<1:
            return []
+        key=cast_name+'_'+str(count)+'@'+'cast'
+        value = r.get(key)
+        if value:
+            return json.loads(value)
         default_value = 2
 
         pipeline = [
@@ -37,14 +44,7 @@ async def get_cast(cast_name: str, count:Optional[int]=10):
                 }
             }},
             {
-                "$project": {
-                    "_id": 1,
-                    "title": 1,
-                    "poster": 1,
-                    "released": 1,
-                    "runtime": 1,
-                    "imdb": 1,
-                }
+                "$project": projects
             },
             {
                 "$sort": {"imdb.rating": -1}
@@ -59,8 +59,7 @@ async def get_cast(cast_name: str, count:Optional[int]=10):
         if movies:
             for movie in movies:
                 movie['_id']= str(movie['_id'])
-                if 'released' in movie:
-                    movie['released']=movie['released'].strftime('%Y-%m-%d %H:%M:%S')
+            r.set(key,json.dumps(movies))
             return movies
         return []
     except Exception as e:
@@ -73,6 +72,10 @@ async def get_director(director_name: str, count:Optional[int]=10):
     try:
         if count<1:
            return []
+        key=director_name+'_'+str(count)+'@'+'director'
+        value = r.get(key)
+        if value:
+            return json.loads(value)
         default_value = 2
 
         pipeline = [
@@ -97,14 +100,7 @@ async def get_director(director_name: str, count:Optional[int]=10):
             }}
             ,
             {
-                "$project": {
-                    "_id": 1,
-                    "title": 1,
-                    "poster": 1,
-                    "released": 1,
-                    "runtime": 1,
-                    "imdb": 1,
-                }
+                "$project": projects
             },
             {
                 "$sort": {"imdb.rating": -1}
@@ -119,8 +115,7 @@ async def get_director(director_name: str, count:Optional[int]=10):
         if movies:
             for movie in movies:
                 movie['_id']= str(movie['_id'])
-                if 'released' in movie:
-                    movie['released']=movie['released'].strftime('%Y-%m-%d %H:%M:%S')
+            r.set(key,json.dumps(movies))
             return movies
         return []
     except Exception as e:
