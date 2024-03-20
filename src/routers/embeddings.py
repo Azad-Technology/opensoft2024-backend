@@ -10,7 +10,7 @@ from src.utils.ada_embedder import embed_movie as embed_movie_ada, get_embedding
 from src.db import Movies, Embedded_movies
 import redis,json
 
-r = redis.Redis(host=config['REDIS_URL'],port=config['TTL_PORT'], decode_responses=True)
+r = redis.Redis(host='10.105.12.4',port=6379, decode_responses=True)
 
 @router.get("/init_embeddings")
 async def init_embeddings():
@@ -44,7 +44,7 @@ async def rrf(request: schemas.RRFQuerySchema):
     value = r.get(key)
     print(value)
     if value:
-        return value
+        return json.loads(value)
     
     query_embedding = get_embedding_ada([query])
     query_embedding = query_embedding[0].tolist()[0]
@@ -94,7 +94,12 @@ async def rrf(request: schemas.RRFQuerySchema):
                             "index": "movie_index",
                             "phrase": {
                             "query": query,
-                            "path": "title"
+                            "path": "title",
+                            "score":{
+                                "boost":{
+                                    "value":4
+                                }
+                            }
                             }
                     }
                     }, 
@@ -117,7 +122,7 @@ async def rrf(request: schemas.RRFQuerySchema):
                         "$addFields": {
                             "fts_score": {
                                 "$divide": [
-                                    1.0,
+                                    0.25,
                                     {"$add": ["$rank", full_text_penalty, 1]}
                                 ]
                             }
@@ -236,7 +241,7 @@ async def sem_search(request: schemas.RRFQuerySchema):
     value = r.get(key)
     print(value)
     if value:
-        return value
+        return json.loads(value)
     
     pipeline = [
     {
@@ -266,5 +271,5 @@ async def sem_search(request: schemas.RRFQuerySchema):
             "title": movie['title'],
             "_id": str(movie['_id'])
         })
-    r.set(key,response)
+    r.set(key,json.dumps(response))
     return response

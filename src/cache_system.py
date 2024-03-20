@@ -1,7 +1,7 @@
 import redis
 from src.config import config
 
-r = redis.Redis(host=config['REDIS_URL'],port=config['TTL_PORT'], decode_responses=True)
+r = redis.Redis(host='10.105.12.4',port=6379, decode_responses=True)
 
 # Global variable to store the default TTL value
 DEFAULT_TTL_KEY = "app:default_ttl"

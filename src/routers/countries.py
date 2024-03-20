@@ -6,14 +6,19 @@ from src import schemas
 from src.config import config
 from bson.objectid import ObjectId
 from typing import Optional
+import redis,json
 
+r = redis.Redis(host='10.105.12.4',port=6379, decode_responses=True)
 router=APIRouter()
 
 @router.get('/countries_top/{country_name}')       #region name case insensitive , count should be optional
 async def get_movies(country_name:str, count: Optional[int] = 10):
     
     try:
-
+        key=country_name+'_'+str(count)+'@'+'country'
+        value = r.get(key)
+        if value:
+            return json.loads(value)
         if count<1:
            return []
         default_value = 2
@@ -59,6 +64,7 @@ async def get_movies(country_name:str, count: Optional[int] = 10):
         if movies:
             for movie in movies:
                  movie['_id']= str(movie['_id'])
+            r.set(key,json.dumps(movies))
             return movies
         return []
     except Exception as e:

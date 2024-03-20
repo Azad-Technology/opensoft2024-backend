@@ -8,7 +8,9 @@ from bson.objectid import ObjectId
 from pymongo import DESCENDING
 from typing import Optional
 from pymongo import DESCENDING
+import redis,json
 
+r = redis.Redis(host='10.105.12.4',port=6379, decode_responses=True)
 router=APIRouter()
 
 
@@ -16,6 +18,10 @@ router=APIRouter()
 async def get_movie_by_genre(genre_name:str):
     try:
         projection={"_id":1, "title":1, "poster":1, "released": 1, "runtime":1, 'imdb':1, 'tomatoes':1}
+        key=genre_name+'@'+'genre'
+        value = r.get(key)
+        if value:
+            return json.loads(value)
         movies = await Movies.find({"genres": {'$in':[genre_name]}}, projection).to_list(length = None)
         movies = await Movies.find({"genres": {'$in':[genre_name]}}, projection).to_list(length = None)
         ret=[]
@@ -25,6 +31,7 @@ async def get_movie_by_genre(genre_name:str):
                 if '_id' in movie:
                     movie['_id']=str(movie['_id'])
                 ret.append(movie)
+            r.set(key,json.dumps(ret))
         return ret
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -37,7 +44,10 @@ async def get_movies(genre_name:str,  count: Optional[int] = 10):
         if count<1:
            return []
         default_value = 2
-
+        key=genre_name+'_'+str(count)+'@'+'genre_top'
+        value = r.get(key)
+        if value:
+            return json.loads(value)
         pipeline = [
             {
                 "$addFields": {
@@ -79,6 +89,7 @@ async def get_movies(genre_name:str,  count: Optional[int] = 10):
         if movies:
             for movie in movies:
                  movie['_id']= str(movie['_id'])
+            r.set(key,json.dumps(movies))
             return movies
         return []
     except Exception as e:

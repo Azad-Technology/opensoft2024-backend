@@ -7,7 +7,7 @@ from promise import Promise
 import json
 import redis
 
-r = redis.Redis(host=config['REDIS_URL'],port=config['TTL_PORT'], decode_responses=True)
+r = redis.Redis(host='10.105.12.4',port=6379, decode_responses=True)
 router=APIRouter()
 
 @router.get('/autosearch/{arg}')
@@ -17,7 +17,7 @@ async def auto_search_movie(arg: str):
     value = r.get(key)
     print(value)
     if value:
-        return value
+        return json.loads(value)
     pipeline = [
         {
             "$search": {
@@ -94,6 +94,6 @@ async def auto_search_movie(arg: str):
     
     r.set(key,json_result)
     print(results)
-    return json_result
+    return results
 
 
