@@ -10,7 +10,7 @@ from src.utils.ada_embedder import embed_movie as embed_movie_ada, get_embedding
 from src.db import Movies, Embedded_movies
 import redis,json
 
-r = redis.Redis(host='10.105.12.4',port=6379, decode_responses=True)
+r = redis.Redis(host='10.105.12.4',port=8045, decode_responses=True)
 
 @router.get("/init_embeddings")
 async def init_embeddings():

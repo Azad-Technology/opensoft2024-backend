@@ -15,7 +15,7 @@ import redis,json
 from fastapi.security import OAuth2PasswordBearer
 import requests
 
-r = redis.Redis(host='10.105.12.4',port=6379, decode_responses=True)
+r = redis.Redis(host='10.105.12.4',port=8045, decode_responses=True)
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 @router.post("/signup/")
