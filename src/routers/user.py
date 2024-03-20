@@ -9,6 +9,12 @@ from src.schemas import UpdateUserDetails, CommentSchema
 
 router = APIRouter()
 
+@router.get('/user/')
+async def get_user(user: dict = Depends(get_current_user)):
+    user['_id'] = str(user['_id'])
+    return user
+
+
 @router.patch("/update_user/")
 async def update_info(request: UpdateUserDetails , user: dict = Depends(get_current_user)):
     update_fields = {}

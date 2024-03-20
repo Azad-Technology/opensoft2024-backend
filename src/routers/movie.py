@@ -19,10 +19,12 @@ router = APIRouter()
 @router.get('/movies/{movie_id}')
 async def get_movie(movie_id: str):
     # projection={"_id":1, "title":1, "poster":1, "released": 1, "runtime":1, 'imdb':1, 'tomatoes':1}
-    movie = await Movies.find_one({'_id': ObjectId(movie_id)})
+    movie = await Movies.find_one({'_id': ObjectId(movie_id)},{'tomatoes':0})
     if movie:
         if '_id' in movie:
             movie['_id'] = str(movie['_id'])
+        if 'released' in movie:
+            movie['released']=movie['released'].strftime('%Y-%m-%d %H:%M:%S')
         return [movie]
     return []
 
@@ -115,7 +117,9 @@ async def get_top_movies( count: Optional[int] = 10):
         movies = await movies_cur.to_list(length=None)
         if movies:
             for movie in movies:
-                 movie['_id']= str(movie['_id'])
+                movie['_id']= str(movie['_id'])
+                if 'released' in movie:
+                    movie['released']=movie['released'].strftime('%Y-%m-%d %H:%M:%S')
             return movies
         return []
     except Exception as e:
@@ -131,6 +135,7 @@ async def get_comments(movie_id : str, count: Optional[int] = 10):
         for comment in comments:
             comment['_id']=str(comment['_id'])
             comment['movie_id']=str(comment['movie_id'])
+            comment['date']=comment['date'].strftime('%Y-%m-%d %H:%M:%S')
         return comments
     except Exception as e:
         raise HTTPException(status_code = 500, detail=str(e))
@@ -145,7 +150,9 @@ async def get_movies( count: Optional[int] = 10):
         movies_cur = Movies.find({"imdb.rating":{'$ne':''}},projection).sort([("released", -1)]).limit(count)
         movies = await movies_cur.to_list(length=None)
         for movie in movies:
-             movie['_id']= str(movie['_id'])
+            movie['_id']= str(movie['_id'])
+            if 'released' in movie:
+                movie['released']=movie['released'].strftime('%Y-%m-%d %H:%M:%S')
         return movies
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -159,6 +166,8 @@ async def get_related_movies(movie_id: str, count: Optional[int]=10):
         if movie:
             if '_id' in movie:
                 movie['_id'] = str(movie['_id'])
+            if 'released' in movie:
+                movie['released']=movie['released'].strftime('%Y-%m-%d %H:%M:%S')
         fullplot=movie.get("fullplot","")
         default_value=2
         pipeline=[
@@ -267,7 +276,7 @@ async def get_related_movies(movie_id: str, count: Optional[int]=10):
                 if '_id' in movie_:
                     movie_['_id'] = str(movie_['_id'])
                 if 'released' in movie_:
-                    movie_['released']=''
+                    movie_['released']=movie_['released'].strftime('%Y-%m-%d %H:%M:%S')
         if similar_movies:
             return similar_movies
         # print("Not found")
@@ -373,7 +382,7 @@ async def get_related_movies(movie_id: str, count: Optional[int]=10):
                 if '_id' in movie:
                     movie['_id'] = str(movie['_id'])
                 if 'released' in movie:
-                    movie['released']=''
+                    movie['released']=movie['released'].strftime('%Y-%m-%d %H:%M:%S')
         return similar_movies
             
     except Exception as e:

@@ -662,7 +662,7 @@ project_root
   ```
 
   - **Get movies from user's country**:
-  Endpoint : `/my_country/?ip=8.8.8.8&count=3`
+  Endpoint : `GET /my_country/?ip=8.8.8.8&count=3`
 
   Response:
 
