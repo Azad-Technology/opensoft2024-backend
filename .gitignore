@@ -5,3 +5,4 @@ __pycache__/
 src/routers/movies2.py
 test.py
 genres.json
+src/db2.py

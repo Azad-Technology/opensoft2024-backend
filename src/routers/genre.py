@@ -1,21 +1,28 @@
 from fastapi import APIRouter, HTTPException
 from uuid import uuid4
 
-from src.db import Movies
+from src.db import Movies, projects
 from src import schemas
 from src.config import config
 from bson.objectid import ObjectId
 from pymongo import DESCENDING
 from typing import Optional
+from pymongo import DESCENDING
+import redis,json
 from datetime import datetime
 
+r = redis.Redis(host='10.105.12.4',port=8045, decode_responses=True)
 router=APIRouter()
 
 
 @router.get('/genre/{genre_name}/')
 async def get_movie_by_genre(genre_name:str):
     try:
-        projection={"_id":1, "title":1, "poster":1, "released": 1, "runtime":1, 'imdb':1}
+        key=genre_name+'@'+'genre'
+        value = r.get(key)
+        if value:
+            return json.loads(value)
+        projection=projects
         movies = await Movies.find({"genres": {'$in':[genre_name]}}, projection).limit(15).to_list(length = None)
         ret=[]
         
@@ -23,10 +30,8 @@ async def get_movie_by_genre(genre_name:str):
             for movie in movies:
                 if '_id' in movie:
                     movie['_id']=str(movie['_id'])
-                if 'released' in movie:
-                    movie['released']=movie['released'].strftime('%Y-%m-%d %H:%M:%S')
                 ret.append(movie)
-                
+            r.set(key,json.dumps(ret))
         return ret
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -39,7 +44,10 @@ async def get_movies_gtop(genre_name:str,  count: Optional[int] = 10):
         if count<1:
            return []
         default_value = 2
-
+        key=genre_name+'_'+str(count)+'@'+'genre_top'
+        value = r.get(key)
+        if value:
+            return json.loads(value)
         pipeline = [
             {
                 "$addFields": {
@@ -58,14 +66,7 @@ async def get_movies_gtop(genre_name:str,  count: Optional[int] = 10):
                 }
             },
             {
-                "$project": {
-                    "_id": 1,
-                    "title": 1,
-                    "poster": 1,
-                    "released": 1,
-                    "runtime": 1,
-                    "imdb": 1,
-                }
+                "$project": projects
             },
             {
                 "$sort": {"imdb.rating": -1}
@@ -80,8 +81,7 @@ async def get_movies_gtop(genre_name:str,  count: Optional[int] = 10):
         if movies:
             for movie in movies:
                 movie['_id']= str(movie['_id'])
-                if 'released' in movie:
-                        movie['released']=movie['released'].strftime('%Y-%m-%d %H:%M:%S')
+            r.set(key,json.dumps(movies))
             return movies
         return []
     except Exception as e:
@@ -95,7 +95,10 @@ async def get_movies(genre_name:str,  count: Optional[int] = 10):
         if count<1:
            return []
         default_value = 2
-
+        key=genre_name+'_'+str(count)+'@'+'genre_top_movies'
+        value = r.get(key)
+        if value:
+            return json.loads(value)
         pipeline = [
             {
                 "$addFields": {
@@ -115,14 +118,7 @@ async def get_movies(genre_name:str,  count: Optional[int] = 10):
                 }
             },
             {
-                "$project": {
-                    "_id": 1,
-                    "title": 1,
-                    "poster": 1,
-                    "released": 1,
-                    "runtime": 1,
-                    "imdb": 1,
-                }
+                "$project": projects
             },
             {
                 "$sort": {"imdb.rating": -1}
@@ -137,8 +133,7 @@ async def get_movies(genre_name:str,  count: Optional[int] = 10):
         if movies:
             for movie in movies:
                 movie['_id']= str(movie['_id'])
-                if 'released' in movie:
-                        movie['released']=movie['released'].strftime('%Y-%m-%d %H:%M:%S')
+            r.set(key,json.dumps(movies))
             return movies
         return []
     except Exception as e:
@@ -152,7 +147,10 @@ async def get_movies_gts(genre_name:str,  count: Optional[int] = 10):
         if count<1:
            return []
         default_value = 2
-
+        key=genre_name+'_'+str(count)+'@'+'genre_top_series'
+        value = r.get(key)
+        if value:
+            return json.loads(value)
         pipeline = [
             {
                 "$addFields": {
@@ -172,14 +170,7 @@ async def get_movies_gts(genre_name:str,  count: Optional[int] = 10):
                 }
             },
             {
-                "$project": {
-                    "_id": 1,
-                    "title": 1,
-                    "poster": 1,
-                    "released": 1,
-                    "runtime": 1,
-                    "imdb": 1,
-                }
+                "$project": projects
             },
             {
                 "$sort": {"imdb.rating": -1}
@@ -194,8 +185,7 @@ async def get_movies_gts(genre_name:str,  count: Optional[int] = 10):
         if movies:
             for movie in movies:
                  movie['_id']= str(movie['_id'])
-                 if 'released' in movie:
-                    movie['released']=movie['released'].strftime('%Y-%m-%d %H:%M:%S')
+            r.set(key,json.dumps(movies))
             return movies
         return []
     except Exception as e:
