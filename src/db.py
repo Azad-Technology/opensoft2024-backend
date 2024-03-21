@@ -22,6 +22,7 @@ Theaters = db.theaters
 Movies2 = db.movies2
 Embedded_movies_new = db.embedded_movies_new
 Embedded_movies2 = db.embedded_movies2
+Watchlists=db['watchlists']
 projects={
         "_id": 1,
         "title": 1,
@@ -31,6 +32,8 @@ projects={
         "poster_path":1,
         'genres':1,
         'year':1,
+        'backdrop_path':1,
+        'plot':1
     }
 
 
