@@ -32,6 +32,7 @@ projects={
         "backdrop_path":1,
         'genres':1,
         'year':1,
+        'plot':{"$ifNull": ["$plot", ""]},
     }
 
 
