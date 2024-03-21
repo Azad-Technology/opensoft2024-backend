@@ -6,10 +6,12 @@ from src import schemas
 from src.config import config
 from bson.objectid import ObjectId
 from typing import Optional
+import redis,json
 import pycountry
 import json
 from pymongo import TEXT
 
+r = redis.Redis(host='10.105.12.4',port=8045, decode_responses=True)
 
 router = APIRouter()
 
@@ -20,12 +22,17 @@ router = APIRouter()
 async def get_movie(movie_id: str):
     # projection={"_id":1, "title":1, "poster":1, "released": 1, "runtime":1, 'imdb':1, 'tomatoes':1}
     try:
+        key=movie_id+'@'+'movie_by_id'
+        value = r.get(key)
+        if value:
+            return json.loads(value)
         movie = await Movies.find_one({'_id': ObjectId(movie_id)},{'tomatoes':0})
         if movie:
             if '_id' in movie:
                 movie['_id'] = str(movie['_id'])
             if 'released' in movie:
                 movie['released']=movie['released'].strftime('%Y-%m-%d %H:%M:%S')
+            r.set(key,json.dumps([movie]))
             return [movie]
         return []
     except Exception as e:
@@ -40,7 +47,10 @@ async def get_series( count: Optional[int] = 10):
         if count<1:
            return []
         default_value = 2
-
+        key='@top_series'
+        value = r.get(key)
+        if value:
+            return json.loads(value)
         pipeline = [
             {
                 "$addFields": {
@@ -74,7 +84,7 @@ async def get_series( count: Optional[int] = 10):
         if movies:
             for movie in movies:
                 movie['_id']= str(movie['_id'])
-                
+            r.set(key,json.dumps(movies))
             return movies
         return []
     except Exception as e:
@@ -87,7 +97,10 @@ async def get_top_movies( count: Optional[int] = 10):
         if count<1:
            return []
         default_value = 2
-
+        key='@top_movies'
+        value = r.get(key)
+        if value:
+            return json.loads(value)
         pipeline = [
             {
                 "$addFields": {
@@ -123,6 +136,7 @@ async def get_top_movies( count: Optional[int] = 10):
                 movie['_id']= str(movie['_id'])
                 if 'released' in movie:
                     movie['released']=movie['released'].strftime('%Y-%m-%d %H:%M:%S')
+                r.set(key,json.dumps(movies))
             return movies
         return []
     except Exception as e:
@@ -134,11 +148,31 @@ async def get_comments(movie_id : str, count: Optional[int] = 10):
     try:
         if count<1:
             return []
+        key=movie_id+'_'+str(count)+'@'+'comments'
+        value = r.get(key)
+        if value:
+            return json.loads(value)
         comments=await Comments.find({'movie_id':ObjectId(movie_id)}).sort([("date", -1)]).limit(count).to_list(length=None)
         for comment in comments:
             comment['_id']=str(comment['_id'])
             comment['movie_id']=str(comment['movie_id'])
             comment['date']=comment['date'].strftime('%Y-%m-%d %H:%M:%S')
+        r.set(key,json.dumps(comments))
+        return comments
+    except Exception as e:
+        raise HTTPException(status_code = 500, detail=str(e))
+    
+@router.get('/recent_comments/')
+async def get_recent_comments(count: Optional[int] = 10):
+    try:
+        if count<1:
+            return []
+        comments=await Comments.find().sort([("date", -1)]).limit(count).to_list(length=None)
+        for comment in comments:
+            comment['_id']=str(comment['_id'])
+            comment['movie_id']=str(comment['movie_id'])
+            comment['date']=comment['date'].strftime('%Y-%m-%d %H:%M:%S')
+        r.set(key,json.dumps(comments))
         return comments
     except Exception as e:
         raise HTTPException(status_code = 500, detail=str(e))
@@ -162,6 +196,10 @@ async def get_movies( count: Optional[int] = 10):
     try:
         if count<1:
            return []
+        key=str(count)+'@'+'recents'
+        value = r.get(key)
+        if value:
+            return json.loads(value)
         projection=projects
         projection['released']=1
         movies_cur = Movies.find({"imdb.rating":{'$ne':''}},projection).sort([("released", -1)]).limit(count)
@@ -170,6 +208,7 @@ async def get_movies( count: Optional[int] = 10):
             movie['_id']= str(movie['_id'])
             if 'released' in movie:
                 movie['released']=movie['released'].strftime('%Y-%m-%d %H:%M:%S')
+        r.set(key,json.dumps(movies))
         return movies
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -179,6 +218,10 @@ async def get_movies( count: Optional[int] = 10):
 async def get_related_movies(movie_id: str, count: Optional[int]=10):
 
     try:
+        key=movie_id+'_'+str(count)+'@'+'related_movies'
+        value = r.get(key)
+        if value:
+            return json.loads(value)
         movie = await Movies.find_one({'_id': ObjectId(movie_id)})
         if movie:
             if '_id' in movie:
@@ -296,6 +339,7 @@ async def get_related_movies(movie_id: str, count: Optional[int]=10):
                 if 'released' in movie_:
                     movie_['released']=movie_['released'].strftime('%Y-%m-%d %H:%M:%S')
         if similar_movies:
+            r.set(key,json.dumps(similar_movies))
             return similar_movies
         # print("Not found")
         pipeline=[
@@ -402,6 +446,7 @@ async def get_related_movies(movie_id: str, count: Optional[int]=10):
                     movie['_id'] = str(movie['_id'])
                 if 'released' in movie:
                     movie['released']=movie['released'].strftime('%Y-%m-%d %H:%M:%S')
+        r.set(key,json.dumps(similar_movies))
         return similar_movies
             
     except Exception as e:

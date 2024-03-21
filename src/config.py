@@ -12,6 +12,8 @@ config = {
     'REDIS_URL':os.getenv('REDIS_URL'),
     'DEFAULT_TTL':5,
     'PASSWORD_REDIS':os.getenv('PASSWORD_REDIS'),
-    'TTL_PORT':os.getenv('TTL_PORT')
+    'TTL_PORT':os.getenv('TTL_PORT'),
+    'GOOGLE_CLIENT_ID':os.getenv('GOOGLE_CLIENT_ID'),
+    'GOOGLE_CLIENT_SECRET':os.getenv('GOOGLE_CLIENT_SECRET'),
+    'GOOGLE_REDIRECT_URI':os.getenv('GOOGLE_REDIRECT_URI')
 }
-config['DATABASE_URL']='mongodb+srv://somya:123@cluster0.yhd6kk7.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0'

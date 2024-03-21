@@ -1,5 +1,6 @@
-from fastapi import APIRouter, Depends, HTTPException, Request, status, Security
+from fastapi import APIRouter, Depends, HTTPException, Request, status, Security,Depends,Response   
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.responses import RedirectResponse
 from pydantic import BaseModel, Field, ValidationError, validator
 import re
 import bcrypt
@@ -11,6 +12,12 @@ router = APIRouter()
 from bson.objectid import ObjectId
 from src.db import Users
 from datetime import datetime, timedelta, timezone
+import redis,json
+from fastapi.security import OAuth2PasswordBearer
+import requests
+
+r = redis.Redis(host='10.105.12.4',port=8045, decode_responses=True)
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 @router.post("/signup/")
 async def signup(request: schemas.UserSignupSchema):
@@ -79,9 +86,50 @@ async def get_current_user(
             raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
         user = await Users.find_one({'_id': ObjectId(token_data["user_id"])})
         if not user:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")        
         return user
+
     except HTTPException as http_exc:
         raise http_exc
     except Exception as e:
         raise HTTPException(status_code = 500, detail=str(e))
+
+
+
+@router.get("/login/google")
+async def login_google():
+    return {
+        "url": f"https://accounts.google.com/o/oauth2/auth?response_type=code&client_id={config['GOOGLE_CLIENT_ID']}&redirect_uri={config['GOOGLE_REDIRECT_URI']}&scope=openid%20profile%20email&access_type=offline"
+    }
+
+@router.get("/auth/callback")
+async def auth_google(request: Request, response: Response, code: str = None):
+    if "error" in request.query_params:
+        raise HTTPException(status_code=400, detail="Error: " + request.query_params["error"])
+    if code is None:
+        raise HTTPException(status_code=400, detail="Authorization code not provided")
+    
+    token_url = "https://accounts.google.com/o/oauth2/token"
+    data = {
+        "code": code,
+        "client_id": config['GOOGLE_CLIENT_ID'],
+        "client_secret": config['GOOGLE_CLIENT_SECRET'],
+        "redirect_uri": config['GOOGLE_REDIRECT_URI'],
+        "grant_type": "authorization_code",
+    }
+    response = requests.post(token_url, data=data)
+    access_token = response.json().get("access_token")
+    user_info = requests.get("https://www.googleapis.com/oauth2/v1/userinfo", headers={"Authorization": f"Bearer {access_token}"})
+    print(user_info.json())
+    if user_info:
+        
+        email=user_info.json()['email']
+        db_user = await User.find_one({'email': email.lower()})
+        if db_user:
+            raise HTTPException(status_code=400, detail="Cannot login with Google")
+        RedirectResponse(url='/')
+    return user_info.json()
+
+@router.get("/token")
+async def get_token(token: str = Depends(oauth2_scheme)):
+    return jwt.decode(token, config['GOOGLE_CLIENT_SECRET'], algorithms=["HS256"])

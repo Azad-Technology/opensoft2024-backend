@@ -7,7 +7,7 @@ import redis
 from fastapi import APIRouter, HTTPException
 from src.cache_system import set_default_ttl
 
-r = redis.Redis(host=config['REDIS_URL'], password=config['PASSWORD_REDIS'],port=config['TTL_PORT'], decode_responses=True)
+r = redis.Redis(host='10.105.12.4',port=8045, decode_responses=True)
 app = FastAPI()
 
 

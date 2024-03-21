@@ -6,17 +6,22 @@ from src import schemas
 from src.config import config
 from bson.objectid import ObjectId
 from typing import Optional
+import redis,json
 import geoip2.database
 import pycountry
 from datetime import datetime
 
+r = redis.Redis(host='10.105.12.4',port=8045, decode_responses=True)
 router=APIRouter()
 
 @router.get('/countries_top/{country_name}/')       #region name case insensitive , count should be optional
 async def get_movies_from_country(country_name:str, count: Optional[int] = 10):
     
     try:
-
+        key=country_name+'_'+str(count)+'@'+'country_all'
+        value = r.get(key)
+        if value:
+            return json.loads(value)
         if count<1:
            return []
         default_value = 2
@@ -61,7 +66,8 @@ async def get_movies_from_country(country_name:str, count: Optional[int] = 10):
         movies = await movies_cur.to_list(length=None)
         if movies:
             for movie in movies:
-                movie['_id']= str(movie['_id'])
+                 movie['_id']= str(movie['_id'])
+            r.set(key,json.dumps(movies))
                 
             return movies
         return []
@@ -138,7 +144,10 @@ async def get_movie_in_my_region(request:Request, count: Optional[int]=10, ip: O
 async def get_movies(country_name:str, count: Optional[int] = 10):
     
     try:
-
+        key=country_name+'_'+str(count)+'@'+'country_movies'
+        value = r.get(key)
+        if value:
+            return json.loads(value)
         if count<1:
            return []
         default_value = 2
@@ -187,7 +196,7 @@ async def get_movies(country_name:str, count: Optional[int] = 10):
                 movie['_id']= str(movie['_id'])
                 if 'released' in movie:
                     movie['released']=movie['released'].strftime('%Y-%m-%d %H:%M:%S')
-            
+            r.set(key,json.dumps(movies))
             return movies
         return []
     except Exception as e:
@@ -198,7 +207,10 @@ async def get_movies(country_name:str, count: Optional[int] = 10):
 async def get_movies(country_name:str, count: Optional[int] = 10):
     
     try:
-
+        key=country_name+'_'+str(count)+'@'+'country_series'
+        value = r.get(key)
+        if value:
+            return json.loads(value)
         if count<1:
            return []
         default_value = 2
@@ -247,6 +259,7 @@ async def get_movies(country_name:str, count: Optional[int] = 10):
                 movie['_id']= str(movie['_id'])
                 if 'released' in movie:
                     movie['released']=movie['released'].strftime('%Y-%m-%d %H:%M:%S')
+            r.set(key,json.dumps(movies))
             return movies
         return []
     except Exception as e:
