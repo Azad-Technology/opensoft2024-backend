@@ -172,21 +172,6 @@ async def get_recent_comments(count: Optional[int] = 10):
             comment['_id']=str(comment['_id'])
             comment['movie_id']=str(comment['movie_id'])
             comment['date']=comment['date'].strftime('%Y-%m-%d %H:%M:%S')
-        r.set(key,json.dumps(comments))
-        return comments
-    except Exception as e:
-        raise HTTPException(status_code = 500, detail=str(e))
-    
-@router.get('/recent_comments/')
-async def get_recent_comments(count: Optional[int] = 10):
-    try:
-        if count<1:
-            return []
-        comments=await Comments.find().sort([("date", -1)]).limit(count).to_list(length=None)
-        for comment in comments:
-            comment['_id']=str(comment['_id'])
-            comment['movie_id']=str(comment['movie_id'])
-            comment['date']=comment['date'].strftime('%Y-%m-%d %H:%M:%S')
         return comments
     except Exception as e:
         raise HTTPException(status_code = 500, detail=str(e))
