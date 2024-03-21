@@ -32,9 +32,24 @@ class RRFQuerySchema(BaseModel):
     query: str
 
 class UpdateUserDetails(BaseModel):
-    new_pass: Optional[str]
-    new_email: Optional[EmailStr]
+    new_name: Optional[str]=None
+    new_email: Optional[EmailStr]=None
 
 class CommentSchema(BaseModel):
     comment: str
-    movie_name: str
+    movie_id: str
+
+
+class UpdatePasswordSchema(BaseModel):
+    old_password: str
+    new_password: str
+    @validator("new_password")
+    def validate_password(cls, value):
+        # Password must be at least 8 characters long
+        if len(value) < 8:
+            raise ValueError("Password must be at least 8 characters long")
+
+
+        return value
+
+    repeat_password: str

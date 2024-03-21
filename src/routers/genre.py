@@ -58,8 +58,16 @@ async def get_movies_gtop(genre_name:str,  count: Optional[int] = 10):
             {
                 "$project": projects
             },
+            {"$addFields": {
+                "relevance_score": {
+                    "$add": [
+                        {"$multiply": ["$imdb.rating", 10]},
+                        {"$multiply": [{"$abs": {"$subtract":[datetime.now().year , "$year"]}}, -7]},
+                    ]
+                }
+            }},
             {
-                "$sort": {"imdb.rating": -1}
+                '$sort': {'relevance_score':-1}
             },
             {
                 "$limit": count
@@ -107,8 +115,16 @@ async def get_movies(genre_name:str,  count: Optional[int] = 10):
             {
                 "$project": projects
             },
+            {"$addFields": {
+                "relevance_score": {
+                    "$add": [
+                        {"$multiply": ["$imdb.rating", 10]},
+                        {"$multiply": [{"$abs": {"$subtract":[datetime.now().year , "$year"]}}, -7]},
+                    ]
+                }
+            }},
             {
-                "$sort": {"imdb.rating": -1}
+                '$sort': {'relevance_score':-1}
             },
             {
                 "$limit": count
@@ -156,8 +172,16 @@ async def get_movies_gts(genre_name:str,  count: Optional[int] = 10):
             {
                 "$project": projects
             },
+            {"$addFields": {
+                "relevance_score": {
+                    "$add": [
+                        {"$multiply": ["$imdb.rating", 10]},
+                        {"$multiply": [{"$abs": {"$subtract":[datetime.now().year , "$year"]}}, -7]},
+                    ]
+                }
+            }},
             {
-                "$sort": {"imdb.rating": -1}
+                '$sort': {'relevance_score':-1}
             },
             {
                 "$limit": count

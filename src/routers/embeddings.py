@@ -12,242 +12,252 @@ from src.db import Movies, Embedded_movies
 
 @router.get("/init_embeddings")
 async def init_embeddings():
-
-    movies = await Movies.find().to_list(25000)
-    # return {"message": "Embeddings initialized"}
-    for movie in movies:
-        print(f"Generating embedding for {movie['title']}")
-        if "plot" not in movie:
-            continue
-        embedding = get_embedding_ada([movie['plot']])
-        embedding = embedding[0].tolist()[0]
-        embedding = [float(value) for value in embedding]
-        movie['embedding'] = embedding
-        await Embedded_movies.insert_one(movie)
-        if embedding is None:
-            print(f"Failed to embed {movie['title']}")
-        else :
-            print(f"Success")
-    
-    return {"message": "Embeddings initialized"}
+    try:
+        movies = await Movies.find().to_list(25000)
+        # return {"message": "Embeddings initialized"}
+        for movie in movies:
+            print(f"Generating embedding for {movie['title']}")
+            if "plot" not in movie:
+                continue
+            embedding = get_embedding_ada([movie['plot']])
+            embedding = embedding[0].tolist()[0]
+            embedding = [float(value) for value in embedding]
+            movie['embedding'] = embedding
+            await Embedded_movies.insert_one(movie)
+            if embedding is None:
+                print(f"Failed to embed {movie['title']}")
+            else :
+                print(f"Success")
+        
+        return {"message": "Embeddings initialized"}
+    except Exception as e:
+        raise HTTPException(status_code = 500, detail=str(e))
 
 @router.post("/rrf")
 async def rrf(request: schemas.RRFQuerySchema):
-    query = request
-    query = query.query
-    vector_penalty = 3
-    full_text_penalty = 1
+    try:
+        query = request
+        query = query.query
+        vector_penalty = 3
+        full_text_penalty = 1
 
-    query_embedding = get_embedding_ada([query])
-    query_embedding = query_embedding[0].tolist()[0]
-    query_embedding_bson = [float(value) for value in query_embedding]
-    query_vector = [
-        {
-            "$vectorSearch": {
-                "index": "vector_index",
-                "path": "embedding",
-                "queryVector": query_embedding_bson,
-                "numCandidates": 100,
-                "limit": 10
-            }
-        }, 
-        {
-            "$group": {
-                "_id": None,
-                "docs": {"$push": "$$ROOT"}
-            }
-        }, 
-        {
-            "$unwind": {
-                "path": "$docs", 
-                "includeArrayIndex": "rank"
-            }
-        }, 
-        {
-            "$addFields": {
-                "vs_score": {
-                    "$divide": [1.0, {"$add": ["$rank", vector_penalty, 1]}]
+        query_embedding = get_embedding_ada([query])
+        query_embedding = query_embedding[0].tolist()[0]
+        query_embedding_bson = [float(value) for value in query_embedding]
+        query_vector = [
+            {
+                "$vectorSearch": {
+                    "index": "vector_index",
+                    "path": "embedding",
+                    "queryVector": query_embedding_bson,
+                    "numCandidates": 100,
+                    "limit": 10
                 }
-            }
-        }, 
-        {
-            "$project": {
-                "vs_score": 1, 
-                "_id": "$docs._id", 
-                "title": "$docs.title"
-            }
-        },
-        {
-            "$unionWith": {
-                "coll": "embedded_movies",
-                "pipeline": [
-                    {
-                        "$search": {
-                            "index": "movie_index",
-                            "phrase": {
-                            "query": query,
-                            "path": "title"
-                            }
+            }, 
+            {
+                "$group": {
+                    "_id": None,
+                    "docs": {"$push": "$$ROOT"}
+                }
+            }, 
+            {
+                "$unwind": {
+                    "path": "$docs", 
+                    "includeArrayIndex": "rank"
+                }
+            }, 
+            {
+                "$addFields": {
+                    "vs_score": {
+                        "$divide": [1.0, {"$add": ["$rank", vector_penalty, 1]}]
                     }
-                    }, 
-                    {
-                        "$limit": 15
-                    }, 
-                    {
-                        "$group": {
-                            "_id": None,
-                            "docs": {"$push": "$$ROOT"}
+                }
+            }, 
+            {
+                "$project": {
+                    "vs_score": 1, 
+                    "_id": "$docs._id", 
+                    "title": "$docs.title"
+                }
+            },
+            {
+                "$unionWith": {
+                    "coll": "embedded_movies",
+                    "pipeline": [
+                        {
+                            "$search": {
+                                "index": "movie_index",
+                                "text": {
+                                    "query": query,
+                                    "path": "title",
+                                    "fuzzy": {}
+                                }
                         }
-                    }, 
-                    {
-                        "$unwind": {
-                            "path": "$docs", 
-                            "includeArrayIndex": "rank"
-                        }
-                    }, 
-                    {
-                        "$addFields": {
-                            "fts_score": {
-                                "$divide": [
-                                    1.0,
-                                    {"$add": ["$rank", full_text_penalty, 1]}
-                                ]
+                        }, 
+                        {
+                            "$limit": 15
+                        }, 
+                        {
+                            "$group": {
+                                "_id": None,
+                                "docs": {"$push": "$$ROOT"}
+                            }
+                        }, 
+                        {
+                            "$unwind": {
+                                "path": "$docs", 
+                                "includeArrayIndex": "rank"
+                            }
+                        }, 
+                        {
+                            "$addFields": {
+                                "fts_score": {
+                                    "$divide": [
+                                        1.0,
+                                        {"$add": ["$rank", full_text_penalty, 1]}
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "$project": {
+                                "fts_score": 1,
+                                "_id": "$docs._id",
+                                "title": "$docs.title"
                             }
                         }
-                    },
-                    {
-                        "$project": {
-                            "fts_score": 1,
-                            "_id": "$docs._id",
-                            "title": "$docs.title"
+                    ]
+                }
+            },
+            {
+                "$unionWith": {
+                    "coll": "embedded_movies",
+                    "pipeline": [
+                        {
+                            "$search": {
+                                "index": "movie_index",
+                                "text": {
+                                    "query": query,
+                                    "path": {
+                                        "wildcard":"*"
+                                    },
+                                    "fuzzy": {}
+                                }
                         }
-                    }
-                ]
-            }
-        },
-        {
-            "$unionWith": {
-                "coll": "embedded_movies",
-                "pipeline": [
-                    {
-                        "$search": {
-                            "index": "movie_index",
-                            "phrase": {
-                            "query": query,
-                            "path": {
-                                "wildcard":"*"
+                        }, 
+                        {
+                            "$limit": 15
+                        }, 
+                        {
+                            "$group": {
+                                "_id": None,
+                                "docs": {"$push": "$$ROOT"}
                             }
+                        }, 
+                        {
+                            "$unwind": {
+                                "path": "$docs", 
+                                "includeArrayIndex": "rank"
                             }
-                    }
-                    }, 
-                    {
-                        "$limit": 15
-                    }, 
-                    {
-                        "$group": {
-                            "_id": None,
-                            "docs": {"$push": "$$ROOT"}
-                        }
-                    }, 
-                    {
-                        "$unwind": {
-                            "path": "$docs", 
-                            "includeArrayIndex": "rank"
-                        }
-                    }, 
-                    {
-                        "$addFields": {
-                            "fts_score": {
-                                "$divide": [
-                                    1.0,
-                                    {"$add": ["$rank", full_text_penalty, 1]}
-                                ]
+                        }, 
+                        {
+                            "$addFields": {
+                                "fts_score": {
+                                    "$divide": [
+                                        1.0,
+                                        {"$add": ["$rank", full_text_penalty, 1]}
+                                    ]
+                                }
+                            }
+                        },
+                        {
+                            "$project": {
+                                "fts_score": 1,
+                                "_id": "$docs._id",
+                                "title": "$docs.title"
                             }
                         }
-                    },
-                    {
-                        "$project": {
-                            "fts_score": 1,
-                            "_id": "$docs._id",
-                            "title": "$docs.title"
-                        }
-                    }
-                ]
-            }
-        },
-        {
-            "$group": {
-                "_id": "$title",
-                "vs_score": {"$max": "$vs_score"},
-                "fts_score": {"$max": "$fts_score"}
-            }
-        },
-        {
-            "$project": {
-                "_id": 1,
-                "title": 1,
-                "vs_score": {"$ifNull": ["$vs_score", 0]},
-                "fts_score": {"$ifNull": ["$fts_score", 0]}
-            }
-        },
-        {
-            "$project": {
-                "score": {"$add": ["$fts_score", "$vs_score"]},
-                "_id": 1,
-                "title": 1,
-                "vs_score": 1,
-                "fts_score": 1
-            }
-        },
-        {"$sort": {"score": -1}},
-        {"$limit": 20}
-    ]
-    results = await Embedded_movies.aggregate(query_vector).to_list(20)
-    response = []
-    for result in results:
-        result["_id"] = str(result["_id"])
-        response.append({
-            "title": result['_id'],
-            "score": result['score'],
-            "vs_score": result['vs_score'],
-            "fts_score": result['fts_score']
-        })
-    return response
+                    ]
+                }
+            },
+            {
+                "$group": {
+                    "_id": "$title",
+                    "vs_score": {"$max": "$vs_score"},
+                    "fts_score": {"$max": "$fts_score"}
+                }
+            },
+            {
+                "$project": {
+                    "_id": 1,
+                    "title": 1,
+                    "vs_score": {"$ifNull": ["$vs_score", 0]},
+                    "fts_score": {"$ifNull": ["$fts_score", 0]}
+                }
+            },
+            {
+                "$project": {
+                    "score": {"$add": ["$fts_score", "$vs_score"]},
+                    "_id": 1,
+                    "title": 1,
+                    "vs_score": 1,
+                    "fts_score": 1
+                }
+            },
+            {"$sort": {"score": -1}},
+            {"$limit": 20}
+        ]
+        results = await Embedded_movies.aggregate(query_vector).to_list(20)
+        response = []
+        for result in results:
+            result["_id"] = str(result["_id"])
+            response.append({
+                "title": result['_id'],
+                "score": result['score'],
+                "vs_score": result['vs_score'],
+                "fts_score": result['fts_score']
+            })
+        return response
+    except Exception as e:
+        raise HTTPException(status_code = 500, detail=str(e))
 
 
 
 @router.post("/sem_search")
 async def sem_search(request: schemas.RRFQuerySchema):
-    query = request.query
-    query_vector = get_embedding_ada([query])  
-    query_vector = query_vector[0].tolist()[0]
-    query_vector_bson = [float(value) for value in query_vector]
-    pipeline = [
-    {
-        '$vectorSearch': {
-        'index': 'vector_index', 
-            'path': 'embedding',  
-            'queryVector': query_vector_bson,
-            'numCandidates': 200, 
-        'limit': 10
+    try:
+        query = request.query
+        query_vector = get_embedding_ada([query])
+        query_vector = query_vector[0].tolist()[0]
+        query_vector_bson = [float(value) for value in query_vector]
+        pipeline = [
+        {
+            '$vectorSearch': {
+            'index': 'vector_index',
+                'path': 'embedding',
+                'queryVector': query_vector_bson,
+                'numCandidates': 200,
+            'limit': 10
+            }
+        }, {
+            '$project': {
+            '_id': 1, 
+            'score': {
+                '$meta': 'vectorSearchScore'
+            }
+            }
         }
-    }, {
-        '$project': {
-        '_id': 1, 
-        'score': {
-            '$meta': 'vectorSearchScore'
-        }
-        }
-    }
-    ]
+        ]
 
-    results = await Embedded_movies.aggregate(pipeline).to_list(10)
-    response = []
-    for result in results:
-        result["_id"] = str(result["_id"])
-        movie = await Movies.find_one({"_id": ObjectId(result["_id"])})
-        response.append({
-            "title": movie['title'],
-            "_id": str(movie['_id'])
-        })
-    return response
+        results = await Embedded_movies.aggregate(pipeline).to_list(10)
+        response = []
+        for result in results:
+            result["_id"] = str(result["_id"])
+            movie = await Movies.find_one({"_id": ObjectId(result["_id"])})
+            response.append({
+                "title": movie['title'],
+                "_id": str(movie['_id'])
+            })
+        return response
+    except Exception as e:
+        raise HTTPException(status_code = 500, detail=str(e))

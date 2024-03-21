@@ -14,3 +14,4 @@ config = {
     'PASSWORD_REDIS':os.getenv('PASSWORD_REDIS'),
     'TTL_PORT':os.getenv('TTL_PORT')
 }
+config['DATABASE_URL']='mongodb+srv://somya:123@cluster0.yhd6kk7.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0'

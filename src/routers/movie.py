@@ -19,14 +19,17 @@ router = APIRouter()
 @router.get('/movies/{movie_id}')
 async def get_movie(movie_id: str):
     # projection={"_id":1, "title":1, "poster":1, "released": 1, "runtime":1, 'imdb':1, 'tomatoes':1}
-    movie = await Movies.find_one({'_id': ObjectId(movie_id)},{'tomatoes':0})
-    if movie:
-        if '_id' in movie:
-            movie['_id'] = str(movie['_id'])
-        if 'released' in movie:
-            movie['released']=movie['released'].strftime('%Y-%m-%d %H:%M:%S')
-        return [movie]
-    return []
+    try:
+        movie = await Movies.find_one({'_id': ObjectId(movie_id)},{'tomatoes':0})
+        if movie:
+            if '_id' in movie:
+                movie['_id'] = str(movie['_id'])
+            if 'released' in movie:
+                movie['released']=movie['released'].strftime('%Y-%m-%d %H:%M:%S')
+            return [movie]
+        return []
+    except Exception as e:
+        raise HTTPException(status_code = 500, detail=str(e))
 
 
 
@@ -139,6 +142,20 @@ async def get_comments(movie_id : str, count: Optional[int] = 10):
         return comments
     except Exception as e:
         raise HTTPException(status_code = 500, detail=str(e))
+    
+@router.get('/recent_comments/')
+async def get_recent_comments(count: Optional[int] = 10):
+    try:
+        if count<1:
+            return []
+        comments=await Comments.find().sort([("date", -1)]).limit(count).to_list(length=None)
+        for comment in comments:
+            comment['_id']=str(comment['_id'])
+            comment['movie_id']=str(comment['movie_id'])
+            comment['date']=comment['date'].strftime('%Y-%m-%d %H:%M:%S')
+        return comments
+    except Exception as e:
+        raise HTTPException(status_code = 500, detail=str(e))
 
 @router.get('/recent_movies/')
 async def get_movies( count: Optional[int] = 10):
@@ -212,6 +229,7 @@ async def get_related_movies(movie_id: str, count: Optional[int]=10):
                 'plot':1,
                 'languages':1,
                 'fullplot':1,
+                'backdrop_path':1,
                 'languages_intersection':{
                     "$cond": {
                         "if": {"$and": [{"$isArray": ["$languages"]}, {"$isArray": [movie.get("languages", [])]}]},
@@ -320,6 +338,7 @@ async def get_related_movies(movie_id: str, count: Optional[int]=10):
                 'year':1,
                 'plot':1,
                 'languages':1,
+                'backdrop_path':1,
                 'languages_intersection':{
                     "$cond": {
                         "if": {"$and": [{"$isArray": ["$languages"]}, {"$isArray": [movie.get("languages", [])]}]},

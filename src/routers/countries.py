@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Request,Header
+from fastapi import APIRouter, HTTPException, Request,Header, status
 from uuid import uuid4
 
 from src.db import Movies, countries_dict, projects
@@ -8,6 +8,7 @@ from bson.objectid import ObjectId
 from typing import Optional
 import geoip2.database
 import pycountry
+from datetime import datetime
 
 router=APIRouter()
 
@@ -40,8 +41,16 @@ async def get_movies_from_country(country_name:str, count: Optional[int] = 10):
             {
                 "$project": projects
             },
+            {"$addFields": {
+                "relevance_score": {
+                    "$add": [
+                        {"$multiply": ["$imdb.rating", 10]},
+                        {"$multiply": [{"$abs": {"$subtract":[datetime.now().year , "$year"]}}, -7]},
+                    ]
+                }
+            }},
             {
-                "$sort": {"imdb.rating": -1}
+                '$sort': {'relevance_score':-1}
             },
             {
                 "$limit": count
@@ -80,15 +89,18 @@ def get_standardized_country_name(country_name):
     
 
 async def get_client_ip(request: Request):
-    forwarded_for = request.headers.get("X-Forwarded-For")
-    print(forwarded_for)
-    if forwarded_for:
-        client_ip = forwarded_for.split(",")[0]
-    else:
-        # If X-Forwarded-For header is not present, fallback to request.client.host
-        client_ip = request.client.host
-    print(client_ip)
-    return client_ip
+    try:
+        forwarded_for = request.headers.get("X-Forwarded-For")
+        print(forwarded_for)
+        if forwarded_for:
+            client_ip = forwarded_for.split(",")[0]
+        else:
+            # If X-Forwarded-For header is not present, fallback to request.client.host
+            client_ip = request.client.host
+        print(client_ip)
+        return client_ip
+    except Exception as e:
+        raise HTTPException(status_code = 500, detail=str(e))
 
 @router.get('/my_country/')
 async def get_movie_in_my_region(request:Request, count: Optional[int]=10, ip: Optional[str]=None):
@@ -96,8 +108,8 @@ async def get_movie_in_my_region(request:Request, count: Optional[int]=10, ip: O
         if not ip:
             ip=await get_client_ip(request)
         if ip:
-            status, country=get_location_from_ip(ip)
-            if status:
+            status2, country=get_location_from_ip(ip)
+            if status2:
                 standard_country=get_standardized_country_name(country)
                 print(standard_country)
                 if standard_country:
@@ -116,7 +128,9 @@ async def get_movie_in_my_region(request:Request, count: Optional[int]=10, ip: O
             else:
                 return []
         else:
-            raise HTTPException(status_code=404, detail='Address not found')
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Address not found')
+    except HTTPException as http_exc:
+        raise http_exc
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -150,8 +164,16 @@ async def get_movies(country_name:str, count: Optional[int] = 10):
             {
                 "$project": projects
             },
+            {"$addFields": {
+                "relevance_score": {
+                    "$add": [
+                        {"$multiply": ["$imdb.rating", 10]},
+                        {"$multiply": [{"$abs": {"$subtract":[datetime.now().year , "$year"]}}, -7]},
+                    ]
+                }
+            }},
             {
-                "$sort": {"imdb.rating": -1}
+                '$sort': {'relevance_score':-1}
             },
             {
                 "$limit": count
@@ -202,8 +224,16 @@ async def get_movies(country_name:str, count: Optional[int] = 10):
             {
                 "$project": projects
             },
+            {"$addFields": {
+                "relevance_score": {
+                    "$add": [
+                        {"$multiply": ["$imdb.rating", 10]},
+                        {"$multiply": [{"$abs": {"$subtract":[datetime.now().year , "$year"]}}, -7]},
+                    ]
+                }
+            }},
             {
-                "$sort": {"imdb.rating": -1}
+                '$sort': {'relevance_score':-1}
             },
             {
                 "$limit": count

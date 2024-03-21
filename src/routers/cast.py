@@ -1,10 +1,11 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, status
 from uuid import uuid4
 from bson.objectid import ObjectId
 from src.db import Movies, projects
 from src import schemas
 from src.config import config
 from typing import Optional
+from datetime import datetime
 
 router = APIRouter()
 
@@ -39,8 +40,16 @@ async def get_cast(cast_name: str, count:Optional[int]=10):
             {
                 "$project": projects
             },
+            {"$addFields": {
+                "relevance_score": {
+                    "$add": [
+                        {"$multiply": ["$imdb.rating", 10]},
+                        {"$multiply": [{"$abs": {"$subtract":[datetime.now().year , "$year"]}}, -7]},
+                    ]
+                }
+            }},
             {
-                "$sort": {"imdb.rating": -1}
+                '$sort': {'relevance_score':-1}
             },
             {
                 "$limit": count
@@ -90,8 +99,16 @@ async def get_director(director_name: str, count:Optional[int]=10):
             {
                 "$project": projects
             },
+            {"$addFields": {
+                "relevance_score": {
+                    "$add": [
+                        {"$multiply": ["$imdb.rating", 10]},
+                        {"$multiply": [{"$abs": {"$subtract":[datetime.now().year , "$year"]}}, -7]},
+                    ]
+                }
+            }},
             {
-                "$sort": {"imdb.rating": -1}
+                '$sort': {'relevance_score':-1}
             },
             {
                 "$limit": count
