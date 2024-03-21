@@ -11,6 +11,7 @@ from src.config import config
 router = APIRouter()
 from bson.objectid import ObjectId
 from src.db import Users
+from datetime import datetime, timedelta, timezone
 import redis,json
 from fastapi.security import OAuth2PasswordBearer
 import requests
@@ -30,16 +31,21 @@ async def signup(request: schemas.UserSignupSchema):
             "email": request.email.lower(),
             "password": hashed_password,
             "subtype": "Basic",
-            "role": "user"
+            "role": "user",
+            'fav': [],
+            'watchlist':[]
         }
         
         await User.insert_one(user)
         if '_id' in user:
             _id = str(user['_id'])
             
+            
 
         token = jwt.encode(payload={"user_id": str(_id)}, key=config["JWT_KEY"], algorithm="HS256")
-        return {'status': 'success',"message": "User created successfully.", 'token': token, 'type': user['subtype']}
+        return {'status': 'success',"message": "User created successfully.", 'token': token, 'fav': [], 'watchlist':[]}
+    except HTTPException as http_exc:
+        raise http_exc
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     # return {"message": "User created successfully.", "user": user}
@@ -58,8 +64,10 @@ async def login(payload: schemas.UserLoginSchema):
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='User ID not found')
         if not bcrypt.checkpw(payload.password.encode('utf-8'), hashed_password.encode('utf-8')):
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Incorrect email or password')
-        token = jwt.encode(payload={"user_id": str(_id)}, key=config["JWT_KEY"], algorithm="HS256")
-        return {'status': 'success', 'token': token, 'type': db_user['subtype']}
+        token = jwt.encode(payload={"user_id": str(_id), 'exp': datetime.now(timezone.utc)+timedelta(hours=24)}, key=config["JWT_KEY"], algorithm="HS256")
+        return {'status': 'success', 'token': token, 'fav': db_user.get('fav', []), 'watchlist': db_user.get('watchlist', [])}
+    except HTTPException as http_exc:
+        raise http_exc
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -68,15 +76,23 @@ security = HTTPBearer()
 async def get_current_user(
     credentials: HTTPAuthorizationCredentials = Security(security)
 ) -> dict:
-    token = credentials.credentials
     try:
-        token_data = jwt.decode(token, config["JWT_KEY"], algorithms=["HS256"])
-    except jwt.PyJWTError:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
-    user = await Users.find_one({'_id': ObjectId(token_data["user_id"])})
-    if not user:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
-    return user
+        token = credentials.credentials
+        try:
+            token_data = jwt.decode(token, config["JWT_KEY"], algorithms=["HS256"], verify=True)
+        except jwt.ExpiredSignatureError:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail='Expired token')
+        except jwt.PyJWTError:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
+        user = await Users.find_one({'_id': ObjectId(token_data["user_id"])})
+        if not user:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")        
+        return user
+
+    except HTTPException as http_exc:
+        raise http_exc
+    except Exception as e:
+        raise HTTPException(status_code = 500, detail=str(e))
 
 
 
