@@ -5,7 +5,7 @@ from src.db import Movies, Comments, projects
 from src import schemas
 from src.config import config
 from bson.objectid import ObjectId
-from typing import Optional
+from typing import Optional, List
 import redis,json
 import pycountry
 import json
@@ -136,7 +136,7 @@ async def get_top_movies( count: Optional[int] = 10):
                 movie['_id']= str(movie['_id'])
                 if 'released' in movie:
                     movie['released']=movie['released'].strftime('%Y-%m-%d %H:%M:%S')
-                r.set(key,json.dumps(movies))
+            r.set(key,json.dumps(movies))
             return movies
         return []
     except Exception as e:
@@ -436,5 +436,25 @@ async def get_related_movies(movie_id: str, count: Optional[int]=10):
         r.set(key,json.dumps(similar_movies))
         return similar_movies
             
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/movies_list/")
+async def get_movies(movies_ids: List[str]):
+    try:
+        
+        bson_movies_ids = [ObjectId(oid) for oid in movies_ids]
+
+        
+        movies = await Movies.find({"_id": {"$in": bson_movies_ids}}, projects).to_list(length=None)
+
+        for movie in movies:
+            movie['_id']=str(movie['_id'])
+        movies_dict = {str(movie['_id']): movie for movie in movies}
+        ret = [movies_dict[str(movie_id)] for movie_id in movies_ids]
+
+        return ret
+    
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
