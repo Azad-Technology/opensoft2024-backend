@@ -151,28 +151,42 @@ async def cancel_subscription( user: dict = Depends(get_current_user)):
         raise HTTPException(status_code = 500, detail=str(e))
 
     
-@router.patch('/update_subs/{new_subscription}/')
-async def update_subscription_patch( new_subscription: str,user: dict = Depends(get_current_user)):
+@router.post('/webhook')
+async def update_subscription_patch(request):
+    request = request.json
     try:
-            current_subscription = user["subtype"]
-            message = ""
-            user_id = str(user["_id"])
-            if not (new_subscription in ["Gold", "Silver", "Basic"]):
-                raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No subscription exists.")
-            
-            if current_subscription == new_subscription:
-                message = f"You are already using {current_subscription} membership."
-            else:
-                message = f"Your subscription has been changed from {current_subscription} to {new_subscription} ."
-                # Get current date
-                current_date = datetime.now().date()
+        user_email = request['data']['attributes']['user_email']
+        invoice_link = request['data']['attributes']['urls']['invoice_url']
+        user = await Users.find_one({"email": user_email})
+        if not user:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found.") 
+        amount_payed = request['data']['attributes']['subtotal_formatted'][1:]
+        amount_payed = float(amount_payed)
+        if amount_payed >= 95:
+            new_subscription = "Gold"
+        elif amount_payed >= 45:
+            new_subscription = "Silver"
+        else:
+            new_subscription = "Basic"
+        current_subscription = user["subtype"]
+        message = ""
+        user_id = str(user["_id"])
+        if not (new_subscription in ["Gold", "Silver", "Basic"]):
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No subscription exists.")
+        
+        if current_subscription == new_subscription:
+            message = f"You are already using {current_subscription} membership."
+        else:
+            message = f"Your subscription has been changed from {current_subscription} to {new_subscription} ."
+            # Get current date
+            current_date = datetime.now().date()
 
-                # Convert date to string format
-                date_string = current_date.strftime("%Y-%m-%d")
-                await Users.update_one({"_id": ObjectId(user_id)}, {"$set": {"subtype": new_subscription, "last_change":date_string}})
-            user["_id"] = str(user["_id"])
-            user["subtype"] = new_subscription
-            return {"message": message}
+            # Convert date to string format
+            date_string = current_date.strftime("%Y-%m-%d")
+            await Users.update_one({"_id": ObjectId(user_id)}, {"$set": {"subtype": new_subscription, "last_change":date_string, "invoice_url": invoice_link, "amount_payed": amount_payed}})   
+        user["_id"] = str(user["_id"])
+        user["subtype"] = new_subscription
+        return {"message": message}
     except HTTPException as http_exc:
         raise http_exc
     except Exception as e:
