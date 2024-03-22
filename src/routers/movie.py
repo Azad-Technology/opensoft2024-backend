@@ -167,11 +167,17 @@ async def get_recent_comments(count: Optional[int] = 10):
     try:
         if count<1:
             return []
+        movies=[]
         comments=await Comments.find().sort([("date", -1)]).limit(count).to_list(length=None)
         for comment in comments:
             comment['_id']=str(comment['_id'])
             comment['movie_id']=str(comment['movie_id'])
             comment['date']=comment['date'].strftime('%Y-%m-%d %H:%M:%S')
+            movies.append(comment['movie_id'])
+        movies2=get_movies(movies)
+        for i, movie in enumerate(movies2):
+            comments[i]['movie_name']=movie['title']
+        
         return comments
     except Exception as e:
         raise HTTPException(status_code = 500, detail=str(e))
