@@ -29,6 +29,7 @@ app.include_router(auth.router, tags=["Auth"])
 app.include_router(user.router, tags=["Update Info"])
 app.include_router(embeddings.router, tags=["Embeddings"])
 
+
 @app.get("/")
 async def root():
     return {"message": "Hello World"}

@@ -3,10 +3,11 @@ from fastapi import Depends
 from src.routers.auth import get_current_user
 from datetime import datetime
 from src.db import Users, Movies, Comments, Watchlists
-from typing import Optional
+from typing import Optional, List
 from bson.objectid import ObjectId
 from src.schemas import UpdateUserDetails, CommentSchema, UpdatePasswordSchema
 import bcrypt
+from src.routers.movie import get_movies
 
 router = APIRouter()
 
@@ -17,9 +18,13 @@ async def get_user(user: dict = Depends(get_current_user)):
         user['_id'] = str(user['_id'])
         user.pop('password')
         if not 'watchlist' in user:
-            user['watchlist']={}
+            user['watchlist']=[]
+        else :
+            user['watchlist']=await get_watchlists(user['watchlist'])
         if not 'fav' in user:
             user['fav']=[]
+        else:
+            user['fav']=await get_movies(user['fav'])
         return user
     except HTTPException as http_exc:
         raise http_exc
@@ -154,12 +159,17 @@ async def update_subscription_patch( new_subscription: str,user: dict = Depends(
             user_id = str(user["_id"])
             if not (new_subscription in ["Gold", "Silver", "Basic"]):
                 raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="No subscription exists.")
-            print(new_subscription)
+            
             if current_subscription == new_subscription:
                 message = f"You are already using {current_subscription} membership."
             else:
                 message = f"Your subscription has been changed from {current_subscription} to {new_subscription} ."
-                await Users.update_one({"_id": ObjectId(user_id)}, {"$set": {"subtype": new_subscription}})
+                # Get current date
+                current_date = datetime.now().date()
+
+                # Convert date to string format
+                date_string = current_date.strftime("%Y-%m-%d")
+                await Users.update_one({"_id": ObjectId(user_id)}, {"$set": {"subtype": new_subscription, "last_change":date_string}})
             user["_id"] = str(user["_id"])
             user["subtype"] = new_subscription
             return {"message": message}
@@ -306,8 +316,62 @@ async def get_watchlist(watchlist_id:str):
         watchlist=await Watchlists.find_one({"_id": ObjectId(watchlist_id)})
         if watchlist:
             watchlist['_id']=str(watchlist['_id'])
+            watchlist['movies']=await get_movies(movies_ids=watchlist['movies'])
             return watchlist
     except HTTPException as http_exc:
         raise http_exc
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/watchlists_list/")
+async def get_watchlists(watchlist_ids: List[str]):
+    try:
+        bson_watchlist_ids = [ObjectId(oid) for oid in watchlist_ids]
+
+        watchlists = await Watchlists.find({"_id": {"$in": bson_watchlist_ids}}).to_list(length=None)
+
+        for watchlist in watchlists:
+            watchlist['_id']=str(watchlist['_id'])
+            watchlist['movies']= await get_movies(movies_ids=watchlist['movies'])
+        
+        movies_dict = {str(movie['_id']): movie for movie in watchlists}
+        ret = [movies_dict[str(movie_id)] for movie_id in watchlist_ids]
+        return ret
+    
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/users_list/")
+async def get_users(users_ids: List[str]):
+    try:
+
+        bson_users_ids = [ObjectId(oid) for oid in users_ids]
+
+
+        users = await Users.find({"_id": {"$in": bson_users_ids}}, {"password":0, "watchlist":0, "fav":0}).to_list(length=None)
+
+        for user in users:
+            user['_id']=str(user['_id'])
+        movies_dict = {str(movie['_id']): movie for movie in users}
+        ret = [movies_dict[str(movie_id)] for movie_id in users_ids]
+        return ret
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get('/user_comments/{user_id}')
+async def get_user_comments(user_id : str, count: Optional[int] = 10):
+    try:
+        if count<1:
+            return []
+        user=await Users.find_one({"_id": ObjectId(user_id)})
+        if not user:
+            return []
+        comments=await Comments.find({'email':user.get("email", '')}).sort([("date", -1)]).limit(count).to_list(length=None)
+        for comment in comments:
+            comment['_id']=str(comment['_id'])
+            comment['movie_id']=str(comment['movie_id'])
+            comment['date']=comment['date'].strftime('%Y-%m-%d %H:%M:%S')
+        return comments
+    except Exception as e:
+        raise HTTPException(status_code = 500, detail=str(e))
