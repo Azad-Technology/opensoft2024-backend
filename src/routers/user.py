@@ -35,8 +35,9 @@ async def get_user(user: dict = Depends(get_current_user)):
 @router.get('/user_basic/{user_id}')
 async def get_user_basic(user_id: str):
     try:
-        user=await Users.find_one({'_id': user_id}, {'password':0, 'watchlist':0, 'fav':0})
+        user=await Users.find_one({'_id':user_id}, {'password':0, 'watchlist':0, 'fav':0})
         user['_id']=str(user['_id'])
+        
         return user
     except HTTPException as http_exc:
         raise http_exc
@@ -213,19 +214,33 @@ async def add_watchlist(watchlist_name:str, user: dict = Depends(get_current_use
         if '_id' in user:
             user['_id'] = str(user['_id'])
         user_watchlists=user.get('watchlist',[])
+        subtype = user.get('subtype')
+
+        if subtype == "Basic":
+            max_watchlists = 1
+        elif subtype == "Silver":
+            max_watchlists = 5
+        elif subtype == "Gold":
+            max_watchlists = float('inf')  # Infinite limit for Gold subscribers
+           
+        if len(user_watchlists) >= max_watchlists:
+            raise HTTPException(status_code=406, detail=f"Maximum {max_watchlists} watchlists allowed for {subtype} subscribers")
+             
         watchlist={
             'name': watchlist_name, 
             'user_id': user['_id'], 
             'movies': []
-        }
+            }
+            
         await Watchlists.insert_one(watchlist)
+            
         
         _id= str(watchlist['_id'])
         
         user_watchlists.append(_id)
         
         await Users.update_one({"_id": ObjectId(user['_id'])}, {'$set': {'watchlist':user_watchlists}})
-        
+          
         return {"message": "Watchlist added successfully.", 'watchlist': _id, 'user_watchlist': user_watchlists}
     except HTTPException as http_exc:
         raise http_exc
