@@ -15,26 +15,6 @@ r = redis.Redis(host='10.105.12.4',port=8045, decode_responses=True)
 router=APIRouter()
 
 
-@router.get('/genre/{genre_name}/')
-async def get_movie_by_genre(genre_name:str):
-    try:
-        key=genre_name+'@'+'genre'
-        value = r.get(key)
-        if value:
-            return json.loads(value)
-        projection=projects
-        movies = await Movies.find({"genres": {'$in':[genre_name]}}, projection).limit(15).to_list(length = None)
-        ret=[]
-        
-        if movies:
-            for movie in movies:
-                if '_id' in movie:
-                    movie['_id']=str(movie['_id'])
-                ret.append(movie)
-            r.set(key,json.dumps(ret))
-        return ret
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get('/genre_top/{genre_name}/')     #name has to be changed

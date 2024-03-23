@@ -44,7 +44,7 @@ async def update_default_ttl(ttl: int):
 
 @app.get("/flush_cache")
 async def flush_cache():
-    await r.flushdb()
+    r.flushdb()
     return {"message": "Cache flushed"}
 
 

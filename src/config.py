@@ -17,4 +17,3 @@ config = {
     'GOOGLE_CLIENT_SECRET':os.getenv('GOOGLE_CLIENT_SECRET'),
     'GOOGLE_REDIRECT_URI':os.getenv('GOOGLE_REDIRECT_URI')
 }
-config['DATABASE_URL']='mongodb+srv://somya:123@cluster0.yhd6kk7.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0'
