@@ -78,6 +78,7 @@ async def get_current_user(
 ) -> dict:
     try:
         token = credentials.credentials
+        print(token)
         try:
             token_data = jwt.decode(token, config["JWT_KEY"], algorithms=["HS256"], verify=True)
         except jwt.ExpiredSignatureError:
@@ -102,9 +103,9 @@ async def login_google():
         "url": f"https://accounts.google.com/o/oauth2/auth?response_type=code&client_id={config['GOOGLE_CLIENT_ID']}&redirect_uri={config['GOOGLE_REDIRECT_URI']}&scope=openid%20profile%20email&access_type=offline"
     }
 
-@router.get("http://40.81.24.53:8000/auth/callback")
+@router.get("/auth/callback")
 async def auth_google(request: Request, response: Response, code: str = None):
-    return "Hello World"
+    # return "Hello World"
     if "error" in request.query_params:
         raise HTTPException(status_code=400, detail="Error: " + request.query_params["error"])
     if code is None:

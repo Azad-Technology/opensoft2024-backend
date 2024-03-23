@@ -6,6 +6,9 @@ from src.routers import movie,cast,genre,search,auth,countries,user
 import redis
 from fastapi import APIRouter, HTTPException
 from src.cache_system import set_default_ttl
+# import date time
+from datetime import datetime
+
 
 r = redis.Redis(host='10.105.12.4',port=8045, decode_responses=True)
 app = FastAPI()
@@ -31,6 +34,7 @@ app.include_router(user.router, tags=["Update Info"])
 
 @app.get("/")
 async def root():
+    print(type(datetime.now().year))
     return {"message": "Hello World"}
 
 @app.get("/set_default_ttl")

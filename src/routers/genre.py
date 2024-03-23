@@ -105,6 +105,7 @@ async def get_movies(genre_name:str,  count: Optional[int] = 10):
         default_value = 2
         key=genre_name+'_'+str(count)+'@'+'genre_top_movies'
         value = r.get(key)
+        print(value)
         if value:
             return json.loads(value)
         pipeline = [
