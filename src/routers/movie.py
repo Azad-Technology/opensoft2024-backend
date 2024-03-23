@@ -26,10 +26,10 @@ async def get_movie(movie_id: str):
         value = r.get(key)
         if value:
             ret=json.loads(value)
-            for r in ret:
-                if 'released' in r:
-                    r['released']=str(r['released'])
-            return r
+            for re in ret:
+                if 'released' in re:
+                    re['released']=str(re['released'])
+            return ret
         movie = await Movies.find_one({'_id': ObjectId(movie_id)},{'tomatoes':0})
         if movie:
             if '_id' in movie:
@@ -55,10 +55,10 @@ async def get_series( count: Optional[int] = 10):
         value = r.get(key)
         if value:
             ret=json.loads(value)
-            for r in ret:
-                if 'released' in r:
-                    r['released']=str(r['released'])
-            return r
+            for re in ret:
+                if 'released' in re:
+                    re['released']=str(re['released'])
+            return ret
         pipeline = [
             {
                 "$addFields": {
@@ -111,10 +111,10 @@ async def get_top_movies( count: Optional[int] = 10):
         value = r.get(key)
         if value:
             ret=json.loads(value)
-            for r in ret:
-                if 'released' in r:
-                    r['released']=str(r['released'])
-            return r
+            for re in ret:
+                if 'released' in re:
+                    re['released']=str(re['released'])
+            return ret
         pipeline = [
             {
                 "$addFields": {
@@ -166,10 +166,10 @@ async def get_comments(movie_id : str, count: Optional[int] = 10):
         value = r.get(key)
         if value:
             ret=json.loads(value)
-            for r in ret:
-                if 'released' in r:
-                    r['released']=str(r['released'])
-            return r
+            for re in ret:
+                if 'released' in re:
+                    re['released']=str(re['released'])
+            return ret
         comments=await Comments.find({'movie_id':ObjectId(movie_id)}).sort([("date", -1)]).limit(count).to_list(length=None)
         for comment in comments:
             comment['_id']=str(comment['_id'])
@@ -186,13 +186,13 @@ async def get_recent_comments(count: Optional[int] = 10):
         if count<1:
             return []
         movies=[]
-        comments=await Comments.find().sort([("date", -1)]).limit(count).to_list(length=None)
+        comments = await Comments.find().sort([("date", -1)]).limit(count).to_list(length=None)
         for comment in comments:
             comment['_id']=str(comment['_id'])
             comment['movie_id']=str(comment['movie_id'])
             comment['date']=comment['date'].strftime('%Y-%m-%d %H:%M:%S')
             movies.append(comment['movie_id'])
-        movies2=get_movies(movies)
+        movies2= await get_movies(movies)
         for i, movie in enumerate(movies2):
             comments[i]['movie_name']=movie['title']
         
@@ -209,10 +209,10 @@ async def get_movies( count: Optional[int] = 10):
         value = r.get(key)
         if value:
             ret=json.loads(value)
-            for r in ret:
-                if 'released' in r:
-                    r['released']=str(r['released'])
-            return r
+            for re in ret:
+                if 'released' in re:
+                    re['released']=str(re['released'])
+            return ret
         projection=projects
         projection['released']=1
         movies_cur = Movies.find({"imdb.rating":{'$ne':''}},projection).sort([("released", -1)]).limit(count)
@@ -235,10 +235,10 @@ async def get_related_movies(movie_id: str, count: Optional[int]=10):
         value = r.get(key)
         if value:
             ret=json.loads(value)
-            for r in ret:
-                if 'released' in r:
-                    r['released']=str(r['released'])
-            return r
+            for re in ret:
+                if 'released' in re:
+                    re['released']=str(re['released'])
+            return ret
         movie = await Movies.find_one({'_id': ObjectId(movie_id)})
         if movie:
             if '_id' in movie:

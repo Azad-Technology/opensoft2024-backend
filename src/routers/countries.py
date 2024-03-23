@@ -21,7 +21,11 @@ async def get_movies_from_country(country_name:str, count: Optional[int] = 10):
         key=country_name+'_'+str(count)+'@'+'country_all'
         value = r.get(key)
         if value:
-            return json.loads(value)
+            ret=json.loads(value)
+            for re in ret:
+                if 'released' in re:
+                    re['released']=str(re['released'])
+            return ret
         if count<1:
            return []
         default_value = 2
@@ -149,7 +153,11 @@ async def get_movies(country_name:str, count: Optional[int] = 10):
         key=country_name+'_'+str(count)+'@'+'country_movies'
         value = r.get(key)
         if value:
-            return json.loads(value)
+            ret=json.loads(value)
+            for re in ret:
+                if 'released' in re:
+                    re['released']=str(re['released'])
+            return ret
         if count<1:
            return []
         default_value = 2
@@ -212,7 +220,11 @@ async def get_movies(country_name:str, count: Optional[int] = 10):
         key=country_name+'_'+str(count)+'@'+'country_series'
         value = r.get(key)
         if value:
-            return json.loads(value)
+            ret=json.loads(value)
+            for re in ret:
+                if 'released' in re:
+                    re['released']=str(re['released'])
+            return ret
         if count<1:
            return []
         default_value = 2

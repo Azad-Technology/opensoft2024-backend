@@ -27,7 +27,11 @@ async def get_movies_gtop(genre_name:str,  count: Optional[int] = 10):
         key=genre_name+'_'+str(count)+'@'+'genre_top'
         value = r.get(key)
         if value:
-            return json.loads(value)
+            ret=json.loads(value)
+            for re in ret:
+                if 'released' in re:
+                    re['released']=str(re['released'])
+            return ret
         pipeline = [
             {
                 "$addFields": {
@@ -88,7 +92,11 @@ async def get_movies(genre_name:str,  count: Optional[int] = 10):
         key=genre_name+'_'+str(count)+'@'+'genre_top_movies'
         value = r.get(key)
         if value:
-            return json.loads(value)
+            ret=json.loads(value)
+            for re in ret:
+                if 'released' in re:
+                    re['released']=str(re['released'])
+            return ret
         pipeline = [
             {
                 "$addFields": {
@@ -150,7 +158,11 @@ async def get_movies_gts(genre_name:str,  count: Optional[int] = 10):
         key=genre_name+'_'+str(count)+'@'+'genre_top_series'
         value = r.get(key)
         if value:
-            return json.loads(value)
+            ret=json.loads(value)
+            for re in ret:
+                if 'released' in re:
+                    re['released']=str(re['released'])
+            return ret
         pipeline = [
             {
                 "$addFields": {
