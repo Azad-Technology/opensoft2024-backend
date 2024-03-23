@@ -69,6 +69,8 @@ async def get_movies_gtop(genre_name:str,  count: Optional[int] = 10):
         if movies:
             for movie in movies:
                 movie['_id']= str(movie['_id'])
+                if 'released' in movie:
+                    movie['released']=movie['released'].strftime('%Y-%m-%d %H:%M:%S')
             r.set(key,json.dumps(movies))
             return movies
         return []
@@ -129,6 +131,8 @@ async def get_movies(genre_name:str,  count: Optional[int] = 10):
         if movies:
             for movie in movies:
                 movie['_id']= str(movie['_id'])
+                if 'released' in movie:
+                    movie['released']=movie['released'].strftime('%Y-%m-%d %H:%M:%S')
             r.set(key,json.dumps(movies))
             return movies
         return []
@@ -189,6 +193,8 @@ async def get_movies_gts(genre_name:str,  count: Optional[int] = 10):
         if movies:
             for movie in movies:
                  movie['_id']= str(movie['_id'])
+                 if 'released' in movie:
+                    movie['released']=movie['released'].strftime('%Y-%m-%d %H:%M:%S')
             r.set(key,json.dumps(movies))
             return movies
         return []
