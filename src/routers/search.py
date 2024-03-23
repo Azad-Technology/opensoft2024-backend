@@ -1,13 +1,13 @@
 from fastapi import APIRouter, HTTPException
 from uuid import uuid4
-
 from src.db import Movies
 from src.config import config
 from promise import Promise
 import json
 import redis
+from src.cache_system import r
 
-r = redis.Redis(host='10.105.12.4',port=8045, decode_responses=True)
+
 router=APIRouter()
 
 @router.get('/autosearch/{arg}')

@@ -10,17 +10,13 @@ import redis,json
 import pycountry
 import json
 from pymongo import TEXT
-
-r = redis.Redis(host='10.105.12.4',port=8045, decode_responses=True)
+from src.cache_system import r
 
 router = APIRouter()
 
 
-
-
 @router.get('/movies/{movie_id}')
 async def get_movie(movie_id: str):
-    # projection={"_id":1, "title":1, "poster":1, "released": 1, "runtime":1, 'imdb':1, 'tomatoes':1}
     try:
         key=movie_id+'@'+'movie_by_id'
         value = r.get(key)

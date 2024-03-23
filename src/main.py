@@ -6,8 +6,8 @@ from src.routers import movie,cast,genre,search,auth,countries,user
 import redis
 from fastapi import APIRouter, HTTPException
 from src.cache_system import set_default_ttl
+from src.cache_system import r
 
-r = redis.Redis(host='10.105.12.4',port=8045, decode_responses=True)
 app = FastAPI()
 
 

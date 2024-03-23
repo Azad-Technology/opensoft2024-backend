@@ -5,8 +5,8 @@ from src.db import Movies, projects
 from src import schemas
 from src.config import config
 import redis,json
+from src.cache_system import r
 
-r = redis.Redis(host='10.105.12.4',port=8045, decode_responses=True)
 from typing import Optional
 from datetime import datetime
 
