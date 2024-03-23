@@ -239,6 +239,9 @@ async def update_subscription_patch(request:Request):
 @router.patch('/add_favourite/{movie_id}')
 async def add_remove_favourite(movie_id: str, user: dict = Depends(get_current_user)):
     try:
+        if user['subtype'] == "Basic":
+            if len(user['fav']) >= 10:
+                return {"message": "You can only add 10 movies to favourites."}
         movie = await Movies.find_one({"_id": ObjectId(movie_id)})
         if not movie:
             raise HTTPException(status_code= status.HTTP_404_NOT_FOUND, detail="Movie not found.")
