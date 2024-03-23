@@ -21,7 +21,11 @@ async def get_cast(cast_name: str, count:Optional[int]=10):
         key=cast_name+'_'+str(count)+'@'+'cast'
         value = r.get(key)
         if value:
-            return json.loads(value)
+            ret=json.loads(value)
+            for re in ret:
+                if 'released' in re:
+                    re['released']=str(re['released'])
+            return ret
         default_value = 2
 
         pipeline = [
@@ -84,7 +88,11 @@ async def get_director(director_name: str, count:Optional[int]=10):
         key=director_name+'_'+str(count)+'@'+'director'
         value = r.get(key)
         if value:
-            return json.loads(value)
+            ret=json.loads(value)
+            for re in ret:
+                if 'released' in re:
+                    re['released']=str(re['released'])
+            return ret
         default_value = 2
 
         pipeline = [

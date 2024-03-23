@@ -105,7 +105,6 @@ async def login_google():
 
 @router.get("/auth/callback")
 async def auth_google(request: Request, response: Response, code: str = None):
-    # return "Hello World"
     if "error" in request.query_params:
         raise HTTPException(status_code=400, detail="Error: " + request.query_params["error"])
     if code is None:
@@ -128,7 +127,8 @@ async def auth_google(request: Request, response: Response, code: str = None):
         email=user_info.json()['email']
         db_user = await User.find_one({'email': email.lower()})
         if db_user:
-            raise HTTPException(status_code=400, detail="Cannot login with Google")
+            token = jwt.encode(payload={"user_id": str(db_user['_id']), 'exp': datetime.now(timezone.utc)+timedelta(hours=24)}, key=config["JWT_KEY"], algorithm="HS256")
+            return {'status': 'success', 'token': token, 'fav': db_user.get('fav', []), 'watchlist': db_user.get('watchlist', [])}
         RedirectResponse(url='/')
     return user_info.json()
 
