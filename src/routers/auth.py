@@ -104,7 +104,6 @@ async def login_google():
 
 @router.get("http://40.81.24.53:8000/auth/callback")
 async def auth_google(request: Request, response: Response, code: str = None):
-    return "Hello World"
     if "error" in request.query_params:
         raise HTTPException(status_code=400, detail="Error: " + request.query_params["error"])
     if code is None:
