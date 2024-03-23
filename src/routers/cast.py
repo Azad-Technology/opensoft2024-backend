@@ -6,7 +6,7 @@ from src import schemas
 from src.config import config
 import redis,json
 
-r = redis.Redis(host='10.105.12.4',port=8045, decode_responses=True)
+r = redis.Redis(host='127.0.0.1',port=8045, decode_responses=True)
 from typing import Optional
 from datetime import datetime
 

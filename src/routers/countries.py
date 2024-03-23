@@ -11,7 +11,7 @@ import geoip2.database
 import pycountry
 from datetime import datetime
 
-r = redis.Redis(host='10.105.12.4',port=8045, decode_responses=True)
+r = redis.Redis(host='127.0.0.1',port=8045, decode_responses=True)
 router=APIRouter()
 
 @router.get('/countries_top/{country_name}/')       #region name case insensitive , count should be optional
