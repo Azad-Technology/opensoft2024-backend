@@ -35,7 +35,7 @@ async def get_user(user: dict = Depends(get_current_user)):
 @router.get('/user_basic/{user_id}')
 async def get_user_basic(user_id: str):
     try:
-        user=await Users.find_one({'_id': user_id}, {'password':0, 'watchlist':0, 'fav':0})
+        user=await Users.find_one({'_id': ObjectId(user_id)}, {'password':0, 'watchlist':0, 'fav':0})
         user['_id']=str(user['_id'])
         return user
     except HTTPException as http_exc:
