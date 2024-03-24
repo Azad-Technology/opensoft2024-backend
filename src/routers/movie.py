@@ -30,8 +30,6 @@ async def get_movie(movie_id: str):
         if movie:
             if '_id' in movie:
                 movie['_id'] = str(movie['_id'])
-            if 'released' in movie:
-                movie['released']=movie['released'].strftime('%Y-%m-%d %H:%M:%S')
             r.set(key,json.dumps([movie]))
             return [movie]
         return []
@@ -88,8 +86,6 @@ async def get_series( count: Optional[int] = 10):
         if movies:
             for movie in movies:
                 movie['_id']= str(movie['_id'])
-                if 'released' in movie:
-                    movie['released']=movie['released'].strftime('%Y-%m-%d %H:%M:%S')
             r.set(key,json.dumps(movies))
             return movies
         return []
@@ -144,8 +140,6 @@ async def get_top_movies( count: Optional[int] = 10):
         if movies:
             for movie in movies:
                 movie['_id']= str(movie['_id'])
-                if 'released' in movie:
-                    movie['released']=movie['released'].strftime('%Y-%m-%d %H:%M:%S')
             r.set(key,json.dumps(movies))
             return movies
         return []
@@ -215,8 +209,6 @@ async def get_movies( count: Optional[int] = 10):
         movies = await movies_cur.to_list(length=None)
         for movie in movies:
             movie['_id']= str(movie['_id'])
-            if 'released' in movie:
-                movie['released']=movie['released'].strftime('%Y-%m-%d %H:%M:%S')
         r.set(key,json.dumps(movies))
         return movies
     except Exception as e:
@@ -239,8 +231,6 @@ async def get_related_movies(movie_id: str, count: Optional[int]=10):
         if movie:
             if '_id' in movie:
                 movie['_id'] = str(movie['_id'])
-            if 'released' in movie:
-                movie['released']=movie['released'].strftime('%Y-%m-%d %H:%M:%S')
         fullplot=movie.get("fullplot","")
         default_value=2
         pipeline=[
@@ -350,8 +340,6 @@ async def get_related_movies(movie_id: str, count: Optional[int]=10):
             if movie_:
                 if '_id' in movie_:
                     movie_['_id'] = str(movie_['_id'])
-                if 'released' in movie_:
-                    movie_['released']=movie_['released'].strftime('%Y-%m-%d %H:%M:%S')
         if similar_movies:
             r.set(key,json.dumps(similar_movies))
             return similar_movies
@@ -459,8 +447,6 @@ async def get_related_movies(movie_id: str, count: Optional[int]=10):
             if movie:
                 if '_id' in movie:
                     movie['_id'] = str(movie['_id'])
-                if 'released' in movie:
-                    movie['released']=movie['released'].strftime('%Y-%m-%d %H:%M:%S')
         r.set(key,json.dumps(similar_movies))
         return similar_movies
             
