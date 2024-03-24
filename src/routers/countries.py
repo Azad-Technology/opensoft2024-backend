@@ -145,6 +145,70 @@ async def get_movie_in_my_region(request:Request, count: Optional[int]=10, ip: O
         raise http_exc
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@router.get('/countries_top_movies/{country_name}/')       #region name case insensitive , count should be optional
+async def get_movies2(country_name:str, count: Optional[int] = 10):
+    
+    try:
+        key=country_name+'_'+str(count)+'@'+'country_movies'
+        value = r.get(key)
+        if value:
+            ret=json.loads(value)
+            for re in ret:
+                if 'released' in re:
+                    re['released']=str(re['released'])
+            return ret
+        if count<1:
+           return []
+        default_value = 2
+
+        pipeline = [
+            {
+                "$addFields": {
+                    "imdb.rating": {
+                        "$cond": [
+                            { "$eq": ["$imdb.rating", ""] },
+                            default_value,
+                            "$imdb.rating"
+                        ]
+                    }
+                }
+            },
+            {
+                "$match": {
+                    "countries": {'$regex': f'^{country_name}$', '$options': 'i'},
+                    "type": "movie"
+                }
+            },
+            {
+                "$project": projects
+            },
+            {"$addFields": {
+                "relevance_score": {
+                    "$add": [
+                        {"$multiply": ["$imdb.rating", 10]},
+                        {"$multiply": [{"$abs": {"$subtract":[datetime.now().year , "$year"]}}, -7]},
+                    ]
+                }
+            }},
+            {
+                '$sort': {'relevance_score':-1}
+            },
+            {
+                "$limit": count
+            }
+        ]
+
+        movies_cur = Movies.aggregate(pipeline)  # handle empty strings
+        movies = await movies_cur.to_list(length=None)
+        if movies:
+            for movie in movies:
+                movie['_id']= str(movie['_id'])
+            r.set(key,json.dumps(movies))
+            return movies
+        return []
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
               
 
 @router.get('/countries_top_series/{country_name}/')       #region name case insensitive , count should be optional
