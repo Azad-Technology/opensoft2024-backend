@@ -42,3 +42,13 @@ typing_extensions==4.10.0
 urllib3==2.2.1
 uvicorn==0.28.0
 yarl==1.9.4
+#for email validation
+pydantic[email]
+
+#hashing
+passlib[bcrypt]
+
+
+#for testing       #new
+pytest
+requests
