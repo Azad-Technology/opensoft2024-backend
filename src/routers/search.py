@@ -79,7 +79,7 @@ async def auto_search_movie(arg: str):
         }, 
         {
             '$project': {
-                '_id': 1, 'title': 1,  "imdb":1,'score': {'$meta': 'searchScore'}
+                '_id': 1, 'title': 1,'poster_path':1,'year':1,'languages':1,  "imdb":1,'score': {'$meta': 'searchScore'}
             }
         },
         { '$sort': { 'score': -1,'imdb': -1} }
