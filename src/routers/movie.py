@@ -147,7 +147,7 @@ async def get_top_movies( count: Optional[int] = 10):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get('/movies/{movie_id}/comments/')
+@router.get('/movies/{movie_id}/comments')
 async def get_comments(movie_id : str, count: Optional[int] = 10):
     try:
         if count<1:
