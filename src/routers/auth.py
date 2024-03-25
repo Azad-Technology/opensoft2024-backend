@@ -24,7 +24,15 @@ async def signup(request: schemas.UserSignupSchema):
     try:
         hashed_password = bcrypt.hashpw(request.password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
         db_user = await User.find_one({"email": request.email.lower()})
+        empty_pwd=""
+        
         if db_user is not None:
+            if bcrypt.checkpw(empty_pwd.encode('utf-8'), db_user.get('password','').encode('utf-8')):
+                token = jwt.encode(payload={"user_id": str(db_user.get('_id'))}, key=config["JWT_KEY"], algorithm="HS256")
+                result = await User.update_one({"email": request.email.lower()},{'$set':{'password':hashed_password,'name':request.name}})
+                if result is None:
+                    raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Password was not change,signup again")
+                return {'status': 'success','message':'Password Changed successfully', 'token': token, 'fav': db_user.get('fav', []), 'watchlist': db_user.get('watchlist', [])}
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="User already exists.")
         user = {
             "name": request.name,
@@ -62,6 +70,9 @@ async def login(payload: schemas.UserLoginSchema):
         _id = db_user.get("_id")
         if not _id:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='User ID not found')
+        empty_pwd=""
+        if bcrypt.checkpw(empty_pwd.encode('utf-8'), hashed_password.encode('utf-8')):
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='User does not exist')
         if not bcrypt.checkpw(payload.password.encode('utf-8'), hashed_password.encode('utf-8')):
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Incorrect email or password')
         token = jwt.encode(payload={"user_id": str(_id), 'exp': datetime.now(timezone.utc)+timedelta(hours=24)}, key=config["JWT_KEY"], algorithm="HS256")
@@ -128,7 +139,13 @@ async def auth_google(request: Request, response: Response, code: str = None):
         if db_user:
             token = jwt.encode(payload={"user_id": str(db_user['_id']), 'exp': datetime.now(timezone.utc)+timedelta(hours=24)}, key=config["JWT_KEY"], algorithm="HS256")
             return {'status': 'success', 'token': token, 'fav': db_user.get('fav', []), 'watchlist': db_user.get('watchlist', [])}
-        RedirectResponse(url='/')
+        id=user_info.json()['id']
+        token=jwt.encode(payload={"user_id": str(id), 'exp': datetime.now(timezone.utc)+timedelta(hours=24)}, key=config["JWT_KEY"], algorithm="HS256")
+        
+        response=await signup(schemas.UserSignupSchema(name=user_info.json()['name'],email=email,password=""))
+        if response['status'] != 'success':
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid SignUp")
+        return response
     return user_info.json()
 
 @router.get("/token")
