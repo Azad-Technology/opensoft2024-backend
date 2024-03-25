@@ -10,31 +10,11 @@ from typing import Optional
 from pymongo import DESCENDING
 import redis,json
 from datetime import datetime
+from src.cache_system import r
 
-r = redis.Redis(host='10.105.12.4',port=8045, decode_responses=True)
 router=APIRouter()
 
 
-@router.get('/genre/{genre_name}/')
-async def get_movie_by_genre(genre_name:str):
-    try:
-        key=genre_name+'@'+'genre'
-        value = r.get(key)
-        if value:
-            return json.loads(value)
-        projection=projects
-        movies = await Movies.find({"genres": {'$in':[genre_name]}}, projection).limit(15).to_list(length = None)
-        ret=[]
-        
-        if movies:
-            for movie in movies:
-                if '_id' in movie:
-                    movie['_id']=str(movie['_id'])
-                ret.append(movie)
-            r.set(key,json.dumps(ret))
-        return ret
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
 
 
 @router.get('/genre_top/{genre_name}/')     #name has to be changed
@@ -47,7 +27,8 @@ async def get_movies_gtop(genre_name:str,  count: Optional[int] = 10):
         key=genre_name+'_'+str(count)+'@'+'genre_top'
         value = r.get(key)
         if value:
-            return json.loads(value)
+            ret=json.loads(value)
+            return ret
         pipeline = [
             {
                 "$addFields": {
@@ -106,7 +87,11 @@ async def get_movies(genre_name:str,  count: Optional[int] = 10):
         key=genre_name+'_'+str(count)+'@'+'genre_top_movies'
         value = r.get(key)
         if value:
-            return json.loads(value)
+            ret=json.loads(value)
+            for re in ret:
+                if 'released' in re:
+                    re['released']=str(re['released'])
+            return ret
         pipeline = [
             {
                 "$addFields": {
@@ -166,7 +151,11 @@ async def get_movies_gts(genre_name:str,  count: Optional[int] = 10):
         key=genre_name+'_'+str(count)+'@'+'genre_top_series'
         value = r.get(key)
         if value:
-            return json.loads(value)
+            ret=json.loads(value)
+            for re in ret:
+                if 'released' in re:
+                    re['released']=str(re['released'])
+            return ret
         pipeline = [
             {
                 "$addFields": {

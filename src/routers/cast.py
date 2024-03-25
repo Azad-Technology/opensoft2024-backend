@@ -5,8 +5,8 @@ from src.db import Movies, projects
 from src import schemas
 from src.config import config
 import redis,json
+from src.cache_system import r
 
-r = redis.Redis(host='10.105.12.4',port=8045, decode_responses=True)
 from typing import Optional
 from datetime import datetime
 
@@ -21,7 +21,11 @@ async def get_cast(cast_name: str, count:Optional[int]=10):
         key=cast_name+'_'+str(count)+'@'+'cast'
         value = r.get(key)
         if value:
-            return json.loads(value)
+            ret=json.loads(value)
+            for re in ret:
+                if 'released' in re:
+                    re['released']=str(re['released'])
+            return ret
         default_value = 2
 
         pipeline = [
@@ -84,7 +88,11 @@ async def get_director(director_name: str, count:Optional[int]=10):
         key=director_name+'_'+str(count)+'@'+'director'
         value = r.get(key)
         if value:
-            return json.loads(value)
+            ret=json.loads(value)
+            for re in ret:
+                if 'released' in re:
+                    re['released']=str(re['released'])
+            return ret
         default_value = 2
 
         pipeline = [

@@ -4,6 +4,7 @@ from motor.motor_asyncio import AsyncIOMotorClient
 import json
 
 client = AsyncIOMotorClient(config['DATABASE_URL'])
+print(config['DATABASE_URL'])
 db = client[config['MONGO_INITDB_DATABASE']]
 print('Connected to MongoDB')
 
@@ -29,6 +30,7 @@ projects={
         "runtime": 1,
         "imdb": 1,
         "poster_path":1,
+        "backdrop_path":1,
         'genres':1,
         'year':1,
         'backdrop_path':1,

@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Request,Header, status
 from uuid import uuid4
-
+import ipaddress
 from src.db import Movies, countries_dict, projects
 from src import schemas
 from src.config import config
@@ -10,8 +10,8 @@ import redis,json
 import geoip2.database
 import pycountry
 from datetime import datetime
+from src.cache_system import r
 
-r = redis.Redis(host='10.105.12.4',port=8045, decode_responses=True)
 router=APIRouter()
 
 @router.get('/countries_top/{country_name}/')       #region name case insensitive , count should be optional
@@ -21,7 +21,11 @@ async def get_movies_from_country(country_name:str, count: Optional[int] = 10):
         key=country_name+'_'+str(count)+'@'+'country_all'
         value = r.get(key)
         if value:
-            return json.loads(value)
+            ret=json.loads(value)
+            for re in ret:
+                if 'released' in re:
+                    re['released']=str(re['released'])
+            return ret
         if count<1:
            return []
         default_value = 2
@@ -66,7 +70,7 @@ async def get_movies_from_country(country_name:str, count: Optional[int] = 10):
         movies = await movies_cur.to_list(length=None)
         if movies:
             for movie in movies:
-                 movie['_id']= str(movie['_id'])
+                movie['_id']= str(movie['_id'])
             r.set(key,json.dumps(movies))
                 
             return movies
@@ -97,13 +101,11 @@ def get_standardized_country_name(country_name):
 async def get_client_ip(request: Request):
     try:
         forwarded_for = request.headers.get("X-Forwarded-For")
-        print(forwarded_for)
         if forwarded_for:
             client_ip = forwarded_for.split(",")[0]
         else:
             # If X-Forwarded-For header is not present, fallback to request.client.host
             client_ip = request.client.host
-        print(client_ip)
         return client_ip
     except Exception as e:
         raise HTTPException(status_code = 500, detail=str(e))
@@ -114,10 +116,14 @@ async def get_movie_in_my_region(request:Request, count: Optional[int]=10, ip: O
         if not ip:
             ip=await get_client_ip(request)
         if ip:
-            status2, country=get_location_from_ip(ip)
+            ip = ipaddress.ip_address(ip)
+            if ip.is_loopback or ip.is_private:
+                country = 'India'
+                status2=True
+            else: 
+                status2, country=get_location_from_ip(ip)
             if status2:
                 standard_country=get_standardized_country_name(country)
-                print(standard_country)
                 if standard_country:
                     if standard_country in countries_dict:
                         country_to_search=countries_dict[standard_country]
@@ -141,13 +147,17 @@ async def get_movie_in_my_region(request:Request, count: Optional[int]=10, ip: O
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get('/countries_top_movies/{country_name}/')       #region name case insensitive , count should be optional
-async def get_movies(country_name:str, count: Optional[int] = 10):
+async def get_movies2(country_name:str, count: Optional[int] = 10):
     
     try:
         key=country_name+'_'+str(count)+'@'+'country_movies'
         value = r.get(key)
         if value:
-            return json.loads(value)
+            ret=json.loads(value)
+            for re in ret:
+                if 'released' in re:
+                    re['released']=str(re['released'])
+            return ret
         if count<1:
            return []
         default_value = 2
@@ -194,23 +204,25 @@ async def get_movies(country_name:str, count: Optional[int] = 10):
         if movies:
             for movie in movies:
                 movie['_id']= str(movie['_id'])
-                if 'released' in movie:
-                    movie['released']=movie['released'].strftime('%Y-%m-%d %H:%M:%S')
             r.set(key,json.dumps(movies))
             return movies
         return []
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-                
+              
 
 @router.get('/countries_top_series/{country_name}/')       #region name case insensitive , count should be optional
-async def get_movies(country_name:str, count: Optional[int] = 10):
+async def get_movies3(country_name:str, count: Optional[int] = 10):
     
     try:
         key=country_name+'_'+str(count)+'@'+'country_series'
         value = r.get(key)
         if value:
-            return json.loads(value)
+            ret=json.loads(value)
+            for re in ret:
+                if 'released' in re:
+                    re['released']=str(re['released'])
+            return ret
         if count<1:
            return []
         default_value = 2
@@ -257,8 +269,6 @@ async def get_movies(country_name:str, count: Optional[int] = 10):
         if movies:
             for movie in movies:
                 movie['_id']= str(movie['_id'])
-                if 'released' in movie:
-                    movie['released']=movie['released'].strftime('%Y-%m-%d %H:%M:%S')
             r.set(key,json.dumps(movies))
             return movies
         return []
