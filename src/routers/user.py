@@ -96,7 +96,7 @@ async def comment(request: CommentSchema, user: dict = Depends(get_current_user)
         comment = {
             "name": user['name'],
             "email": user['email'],
-            "movie_id": movie['_id'],
+            "movie_id": ObjectId(movie['_id']),
             "text": request.comment,
             "date": datetime.now()
         }
@@ -116,6 +116,7 @@ async def delete_comment(comment_id: str, user: dict= Depends(get_current_user))
         comment= await Comments.find_one({"_id": ObjectId(comment_id)})
         if comment:
             comment["_id"]=str(comment["_id"])
+            comment['movie_id']=str(comment['movie_id'])
 
             if True:
                 if email == comment['email'] or user['role']!='user':
