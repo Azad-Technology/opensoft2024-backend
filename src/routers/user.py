@@ -155,10 +155,14 @@ async def cancel_subscription( user: dict = Depends(get_current_user)):
 @router.post('/webhook')
 async def update_subscription_patch(request):
     request = request.json
+    print(f"Received Webhook:  \n{request}")
     try:
         user_email = request['data']['attributes']['user_email']
+        print(f"User Email: {user_email}")
         invoice_link = request['data']['attributes']['urls']['invoice_url']
+        print(f"Invoice Link: {invoice_link}")
         user = await Users.find_one({"email": user_email})
+        print(f"User: {user}")
         if not user:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found.") 
         amount_payed = request['data']['attributes']['subtotal_formatted'][1:]
@@ -169,6 +173,7 @@ async def update_subscription_patch(request):
             new_subscription = "Silver"
         else:
             new_subscription = "Basic"
+        print(f"New Subscription: {new_subscription}")
         current_subscription = user["subtype"]
         message = ""
         user_id = str(user["_id"])
@@ -187,6 +192,7 @@ async def update_subscription_patch(request):
             await Users.update_one({"_id": ObjectId(user_id)}, {"$set": {"subtype": new_subscription, "last_change":date_string, "invoice_url": invoice_link, "amount_payed": amount_payed}})   
         user["_id"] = str(user["_id"])
         user["subtype"] = new_subscription
+        print(f"Message: {message}")
         return {"message": message}
     except HTTPException as http_exc:
         raise http_exc
