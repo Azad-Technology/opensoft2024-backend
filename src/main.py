@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from src.config import config
 from src.db import db
-from src.routers import movie,cast,genre,search,auth,countries,user
+from src.routers import movie,cast,genre,search,auth,countries,user, recommendation
 import redis
 from fastapi import APIRouter, HTTPException
 from src.cache_system import set_default_ttl
@@ -27,6 +27,7 @@ app.include_router(search.router, tags=["Search"])
 app.include_router(countries.router, tags=["Country Top"])
 app.include_router(auth.router, tags=["Auth"])
 app.include_router(user.router, tags=["Update Info"])
+app.include_router(recommendation.router, tags=["Recommendation"])
 
 @app.get("/")
 async def root():

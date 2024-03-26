@@ -89,7 +89,7 @@ async def comment(request: CommentSchema, user: dict = Depends(get_current_user)
         movie = await Movies.find_one({"_id": ObjectId(request.movie_id)})
         if not movie:
             return {"message": "Movie not found."}
-        movie['_id'] = str(movie['_id'])
+        # movie['_id'] = str(movie['_id'])
         user['_id'] = str(user['_id'])
         user['name'] = user['name']
         user['email'] = user['email']
