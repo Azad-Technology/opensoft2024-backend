@@ -16,7 +16,7 @@ router = APIRouter()
 
 
 @router.get('/movies/{movie_id}')
-async def get_movie(movie_id: str):
+async def get_movie_by_id(movie_id: str):
     try:
         key=movie_id+'@'+'movie_by_id'
         value = r.get(key)
@@ -39,7 +39,7 @@ async def get_movie(movie_id: str):
 
 
 @router.get('/top_series')     #name has to be changed
-async def get_series( count: Optional[int] = 10):
+async def get_series_top( count: Optional[int] = 10):
     
     try:
         if count<1:
@@ -148,7 +148,7 @@ async def get_top_movies( count: Optional[int] = 10):
 
 
 @router.get('/movies/{movie_id}/comments')
-async def get_comments(movie_id : str, count: Optional[int] = 10):
+async def get_comments_by_movieid(movie_id : str, count: Optional[int] = 10):
     try:
         if count<1:
             return []
@@ -159,8 +159,25 @@ async def get_comments(movie_id : str, count: Optional[int] = 10):
             for re in ret:
                 if 'released' in re:
                     re['released']=str(re['released'])
+            print("Cached")
             return ret
-        comments=await Comments.find({'movie_id':ObjectId(movie_id)}).sort([("date", -1)]).limit(count).to_list(length=None)
+        pipeline=[
+        {
+            "$match": {
+            "movie_id": ObjectId(movie_id)
+            }
+        },
+        {
+            "$sort": {
+            "date": -1
+            }
+        },
+        {
+            "$limit": count
+        }
+        ]
+
+        comments=await Comments.aggregate(pipeline).to_list(length=None)
         for comment in comments:
             comment['_id']=str(comment['_id'])
             comment['movie_id']=str(comment['movie_id'])
@@ -176,22 +193,43 @@ async def get_recent_comments(count: Optional[int] = 10):
         if count<1:
             return []
         movies=[]
-        comments = await Comments.find().sort([("date", -1)]).limit(count).to_list(length=None)
+        key=f"recent_comments:{count}"
+        value = r.get(key)
+        if value:
+            ret=json.loads(value)
+            for re in ret:
+                if 'released' in re:
+                    re['released']=str(re['released'])
+            print("Cached")
+            return ret
+        pipeline = [
+        {
+            "$sort": {
+                "date": -1
+            }
+        },
+        {
+            "$limit": count
+        }
+        ]
+
+        
+        comments= await Comments.aggregate(pipeline).to_list(length=None)
         for comment in comments:
             comment['_id']=str(comment['_id'])
             comment['movie_id']=str(comment['movie_id'])
             comment['date']=comment['date'].strftime('%Y-%m-%d %H:%M:%S')
             movies.append(comment['movie_id'])
-        movies2= await get_movies(movies)
+        movies2= await get_movies_by_ids(movies)
         for i, movie in enumerate(movies2):
             comments[i]['movie_name']=movie['title']
-        
+        r.set(key,json.dumps(comments))
         return comments
     except Exception as e:
         raise HTTPException(status_code = 500, detail=str(e))
 
 @router.get('/recent_movies')
-async def get_movies1( count: Optional[int] = 10):
+async def get_movies_recent( count: Optional[int] = 10):
     try:
         if count<1:
            return []
@@ -202,6 +240,7 @@ async def get_movies1( count: Optional[int] = 10):
             for re in ret:
                 if 'released' in re:
                     re['released']=str(re['released'])
+            print("Cached")
             return ret
         projection=projects
         projection['released']=1
@@ -226,6 +265,7 @@ async def get_related_movies(movie_id: str, count: Optional[int]=10):
             for re in ret:
                 if 'released' in re:
                     re['released']=str(re['released'])
+            print("Cached")
             return ret
         movie = await Movies.find_one({'_id': ObjectId(movie_id)})
         if movie:
@@ -455,7 +495,7 @@ async def get_related_movies(movie_id: str, count: Optional[int]=10):
 
 
 @router.post("/movies_list")
-async def get_movies(movies_ids: List[str]):
+async def get_movies_by_ids(movies_ids: List[str]):
     try:
         
         bson_movies_ids = [ObjectId(oid) for oid in movies_ids]
@@ -466,7 +506,7 @@ async def get_movies(movies_ids: List[str]):
         for movie in movies:
             movie['_id']=str(movie['_id'])
         movies_dict = {str(movie['_id']): movie for movie in movies}
-        ret = [movies_dict[str(movie_id)] for movie_id in movies_ids]
+        ret = [movies_dict[str(movie_id)] if (str(movie_id) in movies_dict) else {'_id': str(movie_id), 'title': ''} for movie_id in movies_ids]
 
         return ret
     

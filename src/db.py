@@ -24,7 +24,7 @@ Embedded_movies_new = db.embedded_movies_new
 Embedded_movies2 = db.embedded_movies2
 Watchlists=db['watchlists']
 projects={
-        "_id": 1,
+        "_id": { "$toString": "$_id" },
         "title": 1,
         "poster": 1,
         "runtime": 1,

@@ -2,12 +2,12 @@ from fastapi import APIRouter, HTTPException, status
 from fastapi import Depends
 from src.routers.auth import get_current_user
 from datetime import datetime
-from src.db import Users, Movies, Comments, Watchlists
+from src.db import Users, Movies, Comments, Watchlists, projects
 from typing import Optional, List
 from bson.objectid import ObjectId
 from src.schemas import UpdateUserDetails, CommentSchema, UpdatePasswordSchema
 import bcrypt
-from src.routers.movie import get_movies
+from src.routers.movie import get_movies_by_ids as get_movies
 from src.cache_system import r
 
 router = APIRouter()
@@ -105,6 +105,9 @@ async def comment(request: CommentSchema, user: dict = Depends(get_current_user)
         keys=r.keys(f"comment:{movie['_id']}:*")
         for key in keys:
             r.delete(key)
+        keys=r.keys(f"recent_comments:*")
+        for key in keys:
+            r.delete(key)
         return {"message": "Comment added successfully."}
     except HTTPException as http_exc:
         raise http_exc
@@ -122,14 +125,17 @@ async def delete_comment(comment_id: str, user: dict= Depends(get_current_user))
             comment["_id"]=str(comment["_id"])
             comment['movie_id']=str(comment['movie_id'])
 
-            if True:
-                if email == comment['email'] or user['role']!='user':
-                    await Comments.delete_one({"_id": ObjectId(comment_id)})
-                    keys=r.keys(f"comment:{comment['movie_id']}:*")
-                    for key in keys:
-                        r.delete(key)
-                    return {"message": "Comment deleted successfully."}
-                raise HTTPException(status_code = status.HTTP_401_UNAUTHORIZED, detail="Comment does not belong to user")
+            
+            if email == comment['email'] or user['role']!='user':
+                await Comments.delete_one({"_id": ObjectId(comment_id)})
+                keys=r.keys(f"comment:{comment['movie_id']}:*")
+                for key in keys:
+                    r.delete(key)
+                keys=r.keys(f"recent_comments:*")
+                for key in keys:
+                    r.delete(key)
+                return {"message": "Comment deleted successfully."}
+            raise HTTPException(status_code = status.HTTP_401_UNAUTHORIZED, detail="Comment does not belong to user")
         return HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No such comment exists")
     except HTTPException as http_exc:
         raise http_exc
@@ -208,7 +214,7 @@ async def update_subscription_patch(request):
 
 
 @router.patch('/add_favourite/{movie_id}')
-async def add_favourite(movie_id: str, user: dict = Depends(get_current_user)):
+async def add_remove_favourite(movie_id: str, user: dict = Depends(get_current_user)):
     try:
         movie = await Movies.find_one({"_id": ObjectId(movie_id)})
         if not movie:
@@ -341,11 +347,8 @@ async def add_remove_movie_in_watchlist(watchlist_id:str, movie_id: str, user: d
 @router.get('/watchlist/{watchlist_id}')
 async def get_watchlist(watchlist_id:str):
     try:
-        watchlist=await Watchlists.find_one({"_id": ObjectId(watchlist_id)})
-        if watchlist:
-            watchlist['_id']=str(watchlist['_id'])
-            watchlist['movies']=await get_movies(movies_ids=watchlist['movies'])
-            return watchlist
+        watchlist=await get_watchlists([watchlist_id])
+        return watchlist[0]
     except HTTPException as http_exc:
         raise http_exc
     except Exception as e:
@@ -355,16 +358,52 @@ async def get_watchlist(watchlist_id:str):
 async def get_watchlists(watchlist_ids: List[str]):
     try:
         bson_watchlist_ids = [ObjectId(oid) for oid in watchlist_ids]
-
-        watchlists = await Watchlists.find({"_id": {"$in": bson_watchlist_ids}}).to_list(length=None)
-
-        for watchlist in watchlists:
-            watchlist['_id']=str(watchlist['_id'])
-            watchlist['movies']= await get_movies(movies_ids=watchlist['movies'])
-        
-        movies_dict = {str(movie['_id']): movie for movie in watchlists}
-        ret = [movies_dict[str(movie_id)] for movie_id in watchlist_ids]
-        return ret
+        projects["_id"]={ "$toString": "$_id" }
+        pipeline = [
+            {
+                "$match": {
+                    "$expr": { "$in": [ "$_id", bson_watchlist_ids ] }
+                }
+            },
+            {
+                "$lookup": {
+                    "from": "movies",
+                    "let": { "movieIds": "$movies" },
+                    "pipeline": [
+                        {
+                            "$match": {
+                                "$expr": { "$in": [ { "$toString": "$_id" }, "$$movieIds" ] }
+                            }
+                        },
+                        {
+                            "$project":
+                                projects
+                        },
+                        {
+                            "$sort": {
+                                "title":1
+                            }
+                        }
+                    ],
+                    "as": "movies_list"
+                }
+            },
+            {
+                "$addFields": {
+                    "movies": "$movies_list"
+                }
+            },
+            {
+                "$project": {
+                    "_id": { "$toString": "$_id" },
+                    "name": 1,
+                    "used_id": 1,
+                    "movies":1
+                }
+            }
+        ]
+        watchlists = await Watchlists.aggregate(pipeline).to_list(length=None)
+        return watchlists
     
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -395,7 +434,23 @@ async def get_user_comments(user_id : str, count: Optional[int] = 10):
         user=await Users.find_one({"_id": ObjectId(user_id)})
         if not user:
             return []
-        comments=await Comments.find({'email':user.get("email", '')}).sort([("date", -1)]).limit(count).to_list(length=None)
+        pipeline=[
+        {
+            "$match": {
+            "email": user.get("email", '')
+            }
+        },
+        {
+            "$sort": {
+            "date": -1
+            }
+        },
+        {
+            "$limit": count
+        }
+        ]
+
+        comments=await Comments.aggregate(pipeline).to_list(length=None)
         for comment in comments:
             comment['_id']=str(comment['_id'])
             comment['movie_id']=str(comment['movie_id'])
