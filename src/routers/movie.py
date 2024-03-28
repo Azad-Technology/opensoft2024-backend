@@ -16,7 +16,10 @@ router = APIRouter()
 
 
 @router.get('/movies/{movie_id}')
-async def get_movie_by_id(movie_id: str):
+async def get_movie(movie_id: str):
+    if not ObjectId.is_valid(movie_id):
+        raise HTTPException(status_code=400, detail="Invalid movie_id")
+
     try:
         key=movie_id+'@'+'movie_by_id'
         value = r.get(key)
@@ -32,14 +35,16 @@ async def get_movie_by_id(movie_id: str):
                 movie['_id'] = str(movie['_id'])
             r.set(key,json.dumps([movie]))
             return [movie]
-        return []
+        if not movie:
+            return []
+        
     except Exception as e:
         raise HTTPException(status_code = 500, detail=str(e))
 
 
 
-@router.get('/top_series')     #name has to be changed
-async def get_series_top( count: Optional[int] = 10):
+@router.get('/top_series/')     #name has to be changed
+async def get_series( count: Optional[int] = 10):
     
     try:
         if count<1:
@@ -92,7 +97,7 @@ async def get_series_top( count: Optional[int] = 10):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.get('/top_movies')     #name has to be changed
+@router.get('/top_movies/')     #name has to be changed
 async def get_top_movies( count: Optional[int] = 10):
     
     try:
@@ -147,8 +152,8 @@ async def get_top_movies( count: Optional[int] = 10):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get('/movies/{movie_id}/comments')
-async def get_comments_by_movieid(movie_id : str, count: Optional[int] = 10):
+@router.get('/movies/{movie_id}/comments/')
+async def get_comments(movie_id : str, count: Optional[int] = 10):
     try:
         if count<1:
             return []
@@ -187,7 +192,7 @@ async def get_comments_by_movieid(movie_id : str, count: Optional[int] = 10):
     except Exception as e:
         raise HTTPException(status_code = 500, detail=str(e))
     
-@router.get('/recent_comments')
+@router.get('/recent_comments/')             #diff result for count!=10
 async def get_recent_comments(count: Optional[int] = 10):
     try:
         if count<1:
@@ -228,8 +233,8 @@ async def get_recent_comments(count: Optional[int] = 10):
     except Exception as e:
         raise HTTPException(status_code = 500, detail=str(e))
 
-@router.get('/recent_movies')
-async def get_movies_recent( count: Optional[int] = 10):
+@router.get('/recent_movies/')
+async def get_movies( count: Optional[int] = 10):
     try:
         if count<1:
            return []
@@ -254,7 +259,7 @@ async def get_movies_recent( count: Optional[int] = 10):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get('/movies/{movie_id}/related_movies')
+@router.get('/movies/{movie_id}/related_movies/')
 async def get_related_movies(movie_id: str, count: Optional[int]=10):
 
     try:
@@ -498,8 +503,8 @@ async def get_related_movies(movie_id: str, count: Optional[int]=10):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.post("/movies_list")
-async def get_movies_by_ids(movies_ids: List[str]):
+@router.post("/movies_list/")
+async def get_movies(movies_ids: List[str]):
     try:
         
         bson_movies_ids = [ObjectId(oid) for oid in movies_ids]
