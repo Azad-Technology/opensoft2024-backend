@@ -258,6 +258,8 @@ async def get_movies_recent( count: Optional[int] = 10):
 async def get_related_movies(movie_id: str, count: Optional[int]=10):
 
     try:
+        if count<=0:
+            return []
         key=movie_id+'_'+str(count)+'@'+'related_movies'
         value = r.get(key)
         if value:
@@ -271,6 +273,8 @@ async def get_related_movies(movie_id: str, count: Optional[int]=10):
         if movie:
             if '_id' in movie:
                 movie['_id'] = str(movie['_id'])
+        else:
+            return []
         fullplot=movie.get("fullplot","")
         default_value=2
         pipeline=[
