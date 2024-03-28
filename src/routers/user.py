@@ -13,7 +13,7 @@ from src.cache_system import r
 router = APIRouter()
 
 
-@router.get('/user/')
+@router.get('/user')
 async def get_user(user: dict = Depends(get_current_user)):
     try:
         user['_id'] = str(user['_id'])
@@ -45,7 +45,7 @@ async def get_user_basic(user_id: str):
         raise HTTPException(status_code = 500, detail=str(e))
 
 
-@router.patch("/update_user/")
+@router.patch("/update_user")
 async def update_info(request: UpdateUserDetails , user: dict = Depends(get_current_user)):
     try:
         update_fields = {}
@@ -63,7 +63,7 @@ async def update_info(request: UpdateUserDetails , user: dict = Depends(get_curr
         raise HTTPException(status_code = 500, detail=str(e))
 
 
-@router.patch("/update_password/")
+@router.patch("/update_password")
 async def update_password(request: UpdatePasswordSchema , user: dict = Depends(get_current_user)):
     try:
         hashed_password = user['password']
@@ -84,7 +84,7 @@ async def update_password(request: UpdatePasswordSchema , user: dict = Depends(g
         raise HTTPException(status_code = 500, detail=str(e))
 
 
-@router.post("/comment/")
+@router.post("/comment")
 async def comment(request: CommentSchema, user: dict = Depends(get_current_user)):
     try:
         movie = await Movies.find_one({"_id": ObjectId(request.movie_id)})
@@ -137,7 +137,7 @@ async def delete_comment(comment_id: str, user: dict= Depends(get_current_user))
         raise HTTPException(status_code = 500, detail=str(e))
 
 
-@router.patch('/cancel_subs/')
+@router.patch('/cancel_subs')
 async def cancel_subscription( user: dict = Depends(get_current_user)):
     try:
         subtype = user["subtype"]
@@ -351,7 +351,7 @@ async def get_watchlist(watchlist_id:str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.post("/watchlists_list/")
+@router.post("/watchlists_list")
 async def get_watchlists(watchlist_ids: List[str]):
     try:
         bson_watchlist_ids = [ObjectId(oid) for oid in watchlist_ids]
@@ -369,7 +369,7 @@ async def get_watchlists(watchlist_ids: List[str]):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.post("/users_list/")
+@router.post("/users_list")
 async def get_users(users_ids: List[str]):
     try:
 

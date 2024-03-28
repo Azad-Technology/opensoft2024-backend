@@ -13,7 +13,7 @@ from datetime import datetime
 router = APIRouter()
 
 
-@router.get('/cast/{cast_name}/')
+@router.get('/cast/{cast_name}')
 async def get_cast(cast_name: str, count:Optional[int]=10):
     try:
         if count<1:
@@ -80,7 +80,7 @@ async def get_cast(cast_name: str, count:Optional[int]=10):
 
 
 
-@router.get('/director/{director_name}/')
+@router.get('/director/{director_name}')
 async def get_director(director_name: str, count:Optional[int]=10):
     try:
         if count<1:

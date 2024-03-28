@@ -19,7 +19,7 @@ from src.cache_system import r
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
-@router.post("/signup/")
+@router.post("/signup")
 async def signup(request: schemas.UserSignupSchema):
     try:
         hashed_password = bcrypt.hashpw(request.password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
@@ -59,7 +59,7 @@ async def signup(request: schemas.UserSignupSchema):
     # return {"message": "User created successfully.", "user": user}
 
 
-@router.post('/login/')
+@router.post('/login')
 async def login(payload: schemas.UserLoginSchema):
     try:
         db_user = await User.find_one({'email': payload.email.lower()})
