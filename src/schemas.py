@@ -13,7 +13,7 @@ class UserSignupSchema(BaseModel):
     @validator("password")
     def validate_password(cls, value):
         # Password must be at least 8 characters long
-        if len(value) < 8:
+        if len(value) < 8 and value != "":
             raise ValueError("Password must be at least 8 characters long")
 
 
