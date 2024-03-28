@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, Request
 from fastapi import Depends
 from src.routers.auth import get_current_user
 from datetime import datetime
@@ -9,6 +9,10 @@ from src.schemas import UpdateUserDetails, CommentSchema, UpdatePasswordSchema
 import bcrypt
 from src.routers.movie import get_movies_by_ids as get_movies
 from src.cache_system import r
+from src.config import config
+import hmac
+import hashlib
+import json
 
 router = APIRouter()
 
@@ -166,8 +170,22 @@ async def cancel_subscription( user: dict = Depends(get_current_user)):
 
     
 @router.post('/webhook')
-async def update_subscription_patch(request):
-    request = request.json
+async def update_subscription_patch(request:Request):
+    signature = request.headers.get('x-signature', None)  # Assuming signature is passed in the x-signature header
+
+    if not signature:
+        raise HTTPException(status_code=400, detail="X-Signature header is missing")
+
+    # Calculate the expected signature
+    body = await request.body()
+    SIGNING_SECRET=config['LS_SIGNING_SECRET']
+    expected_signature = hmac.new(SIGNING_SECRET.encode(), body.decode('utf-8').encode(), hashlib.sha256).hexdigest()
+
+    # Compare the provided signature with the expected signature
+    if not hmac.compare_digest(signature, expected_signature):
+        raise HTTPException(status_code=403, detail="Invalid signature")
+    
+    request = json.loads(body.decode('utf-8'))
     print(f"Received Webhook:  \n{request}")
     try:
         user_email = request['data']['attributes']['user_email']
@@ -177,12 +195,12 @@ async def update_subscription_patch(request):
         user = await Users.find_one({"email": user_email})
         print(f"User: {user}")
         if not user:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found.") 
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found.")
         amount_payed = request['data']['attributes']['subtotal_formatted'][1:]
         amount_payed = float(amount_payed)
-        if amount_payed >= 95:
+        if amount_payed >= 99:
             new_subscription = "Gold"
-        elif amount_payed >= 45:
+        elif amount_payed >= 49:
             new_subscription = "Silver"
         else:
             new_subscription = "Basic"
@@ -198,10 +216,13 @@ async def update_subscription_patch(request):
         else:
             message = f"Your subscription has been changed from {current_subscription} to {new_subscription} ."
             # Get current date
-            current_date = datetime.now().date()
+            current_date = request['data']['attributes']['updated_at']
 
             # Convert date to string format
-            date_string = current_date.strftime("%Y-%m-%d")
+            original_datetime = datetime.strptime(current_date, "%Y-%m-%dT%H:%M:%S.%fZ")
+
+            # Convert the datetime object to another format
+            date_string = original_datetime.strftime("%Y-%m-%d")
             await Users.update_one({"_id": ObjectId(user_id)}, {"$set": {"subtype": new_subscription, "last_change":date_string, "invoice_url": invoice_link, "amount_payed": amount_payed}})   
         user["_id"] = str(user["_id"])
         user["subtype"] = new_subscription
