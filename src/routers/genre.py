@@ -78,7 +78,7 @@ async def get_movies_gtop(genre_name:str,  count: Optional[int] = 10):
 
 
 @router.get('/genre_top_movies/{genre_name}/')     #name has to be changed
-async def get_movies(genre_name:str,  count: Optional[int] = 10):
+async def get_movies4(genre_name:str,  count: Optional[int] = 10):
     
     try:
         if count<1:

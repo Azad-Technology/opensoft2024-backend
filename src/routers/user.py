@@ -8,6 +8,7 @@ from bson.objectid import ObjectId
 from src.schemas import UpdateUserDetails, CommentSchema, UpdatePasswordSchema
 import bcrypt
 from src.routers.movie import get_movies
+from src.cache_system import r
 
 router = APIRouter()
 
@@ -101,6 +102,9 @@ async def comment(request: CommentSchema, user: dict = Depends(get_current_user)
             "date": datetime.now()
         }
         await Comments.insert_one(comment)
+        keys=r.keys(f"comment:{movie['_id']}:*")
+        for key in keys:
+            r.delete(key)
         return {"message": "Comment added successfully."}
     except HTTPException as http_exc:
         raise http_exc
@@ -121,6 +125,9 @@ async def delete_comment(comment_id: str, user: dict= Depends(get_current_user))
             if True:
                 if email == comment['email'] or user['role']!='user':
                     await Comments.delete_one({"_id": ObjectId(comment_id)})
+                    keys=r.keys(f"comment:{comment['movie_id']}:*")
+                    for key in keys:
+                        r.delete(key)
                     return {"message": "Comment deleted successfully."}
                 raise HTTPException(status_code = status.HTTP_401_UNAUTHORIZED, detail="Comment does not belong to user")
         return HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="No such comment exists")

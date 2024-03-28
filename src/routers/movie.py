@@ -45,7 +45,7 @@ async def get_series( count: Optional[int] = 10):
         if count<1:
            return []
         default_value = 2
-        key='@top_series'
+        key='@top_series'+str(count)
         value = r.get(key)
         if value:
             ret=json.loads(value)
@@ -99,7 +99,7 @@ async def get_top_movies( count: Optional[int] = 10):
         if count<1:
            return []
         default_value = 2
-        key='@top_movies'
+        key='@top_movies'+str(count)
         value = r.get(key)
         if value:
             ret=json.loads(value)
@@ -152,7 +152,7 @@ async def get_comments(movie_id : str, count: Optional[int] = 10):
     try:
         if count<1:
             return []
-        key=movie_id+'_'+str(count)+'@'+'comments'
+        key=f"comment:{movie_id}:{count}"
         value = r.get(key)
         if value:
             ret=json.loads(value)
@@ -191,7 +191,7 @@ async def get_recent_comments(count: Optional[int] = 10):
         raise HTTPException(status_code = 500, detail=str(e))
 
 @router.get('/recent_movies/')
-async def get_movies( count: Optional[int] = 10):
+async def get_movies1( count: Optional[int] = 10):
     try:
         if count<1:
            return []
