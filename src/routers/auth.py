@@ -25,9 +25,10 @@ async def signup(request: schemas.UserSignupSchema):
         hashed_password = bcrypt.hashpw(request.password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
         db_user = await User.find_one({"email": request.email.lower()})
         empty_pwd=""
-        
+        hash_pwd=db_user.get('password','')
         if db_user is not None:
-            if bcrypt.checkpw(empty_pwd.encode('utf-8'), db_user.get('password','').encode('utf-8')):
+            print(empty_pwd.encode('utf-8'), hash_pwd.encode('utf-8'))
+            if empty_pwd == hash_pwd:
                 token = jwt.encode(payload={"user_id": str(db_user.get('_id'))}, key=config["JWT_KEY"], algorithm="HS256")
                 result = await User.update_one({"email": request.email.lower()},{'$set':{'password':hashed_password,'name':request.name}})
                 if result is None:
@@ -71,7 +72,7 @@ async def login(payload: schemas.UserLoginSchema):
         if not _id:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='User ID not found')
         empty_pwd=""
-        if bcrypt.checkpw(empty_pwd.encode('utf-8'), hashed_password.encode('utf-8')):
+        if empty_pwd == hashed_password:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='User does not exist')
         if not bcrypt.checkpw(payload.password.encode('utf-8'), hashed_password.encode('utf-8')):
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Incorrect email or password')
@@ -105,49 +106,35 @@ async def get_current_user(
     except Exception as e:
         raise HTTPException(status_code = 500, detail=str(e))
 
-
-
-@router.get("/login/google")
-async def login_google():
-    return {
-        "url": f"https://accounts.google.com/o/oauth2/auth?response_type=code&client_id={config['GOOGLE_CLIENT_ID']}&redirect_uri={config['GOOGLE_REDIRECT_URI']}&scope=openid%20profile%20email&access_type=offline"
-    }
-
-@router.get("/auth/callback")
-async def auth_google(request: Request, response: Response, code: str = None):
-    if "error" in request.query_params:
-        raise HTTPException(status_code=400, detail="Error: " + request.query_params["error"])
-    if code is None:
-        raise HTTPException(status_code=400, detail="Authorization code not provided")
-    
-    token_url = "https://accounts.google.com/o/oauth2/token"
-    data = {
-        "code": code,
-        "client_id": config['GOOGLE_CLIENT_ID'],
-        "client_secret": config['GOOGLE_CLIENT_SECRET'],
-        "redirect_uri": config['GOOGLE_REDIRECT_URI'],
-        "grant_type": "authorization_code",
-    }
-    response = requests.post(token_url, data=data)
-    access_token = response.json().get("access_token")
-    user_info = requests.get("https://www.googleapis.com/oauth2/v1/userinfo", headers={"Authorization": f"Bearer {access_token}"})
-    print(user_info.json())
-    if user_info:
-        
-        email=user_info.json()['email']
+@router.post("/auth/callback")
+async def auth_google(request: schemas.GoogleAuthLogin):
+    try:
+        name=request.name
+        email=request.email.lower()
+        profilePic=request.profilePic
+        hashed_password = bcrypt.hashpw("".encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
         db_user = await User.find_one({'email': email.lower()})
         if db_user:
             token = jwt.encode(payload={"user_id": str(db_user['_id']), 'exp': datetime.now(timezone.utc)+timedelta(hours=24)}, key=config["JWT_KEY"], algorithm="HS256")
             return {'status': 'success', 'token': token, 'fav': db_user.get('fav', []), 'watchlist': db_user.get('watchlist', [])}
-        id=user_info.json()['id']
-        token=jwt.encode(payload={"user_id": str(id), 'exp': datetime.now(timezone.utc)+timedelta(hours=24)}, key=config["JWT_KEY"], algorithm="HS256")
-        
-        response=await signup(schemas.UserSignupSchema(name=user_info.json()['name'],email=email,password=""))
-        if response['status'] != 'success':
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid SignUp")
-        return response
-    return user_info.json()
-
-@router.get("/token")
-async def get_token(token: str = Depends(oauth2_scheme)):
-    return jwt.decode(token, config['GOOGLE_CLIENT_SECRET'], algorithms=["HS256"])
+        user = {
+            "name": name,
+            "email": email,
+            "password": "",
+            "subtype": "Basic",
+            "role": "user",
+            'fav': [],
+            'watchlist':[],
+            'profilePic':profilePic
+        }
+            
+        await User.insert_one(user)
+        if '_id' in user:
+            _id = str(user['_id'])
+            
+        token = jwt.encode(payload={"user_id": str(_id)}, key=config["JWT_KEY"], algorithm="HS256")
+        return {'status': 'success',"message": "User created successfully.", 'token': token, 'fav': [], 'watchlist':[]}
+    except HTTPException as http_exc:
+        raise http_exc
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

@@ -53,3 +53,8 @@ class UpdatePasswordSchema(BaseModel):
         return value
 
     repeat_password: str
+    
+class GoogleAuthLogin(BaseModel):
+    name: str
+    email: EmailStr
+    profilePic: str
