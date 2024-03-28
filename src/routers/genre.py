@@ -17,7 +17,7 @@ router=APIRouter()
 
 
 
-@router.get('/genre_top/{genre_name}/')     #name has to be changed
+@router.get('/genre_top/{genre_name}')     #name has to be changed
 async def get_movies_gtop(genre_name:str,  count: Optional[int] = 10):
     
     try:
@@ -77,7 +77,7 @@ async def get_movies_gtop(genre_name:str,  count: Optional[int] = 10):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get('/genre_top_movies/{genre_name}/')     #name has to be changed
+@router.get('/genre_top_movies/{genre_name}')     #name has to be changed
 async def get_movies(genre_name:str,  count: Optional[int] = 10):
     
     try:
@@ -141,7 +141,7 @@ async def get_movies(genre_name:str,  count: Optional[int] = 10):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get('/genre_top_series/{genre_name}/')     #name has to be changed
+@router.get('/genre_top_series/{genre_name}')     #name has to be changed
 async def get_movies_gts(genre_name:str,  count: Optional[int] = 10):
     
     try:

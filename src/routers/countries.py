@@ -14,7 +14,7 @@ from src.cache_system import r
 
 router=APIRouter()
 
-@router.get('/countries_top/{country_name}/')       #region name case insensitive , count should be optional
+@router.get('/countries_top/{country_name}')       #region name case insensitive , count should be optional
 async def get_movies_from_country(country_name:str, count: Optional[int] = 10):
     
     try:
@@ -110,7 +110,7 @@ async def get_client_ip(request: Request):
     except Exception as e:
         raise HTTPException(status_code = 500, detail=str(e))
 
-@router.get('/my_country/')
+@router.get('/my_country')
 async def get_movie_in_my_region(request:Request, count: Optional[int]=10, ip: Optional[str]=None):
     try:
         if not ip:
@@ -146,7 +146,7 @@ async def get_movie_in_my_region(request:Request, count: Optional[int]=10, ip: O
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.get('/countries_top_movies/{country_name}/')       #region name case insensitive , count should be optional
+@router.get('/countries_top_movies/{country_name}')       #region name case insensitive , count should be optional
 async def get_movies2(country_name:str, count: Optional[int] = 10):
     
     try:
@@ -211,7 +211,7 @@ async def get_movies2(country_name:str, count: Optional[int] = 10):
         raise HTTPException(status_code=500, detail=str(e))
               
 
-@router.get('/countries_top_series/{country_name}/')       #region name case insensitive , count should be optional
+@router.get('/countries_top_series/{country_name}')       #region name case insensitive , count should be optional
 async def get_movies3(country_name:str, count: Optional[int] = 10):
     
     try:
