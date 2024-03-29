@@ -7,7 +7,6 @@ import json
 import redis
 from src.cache_system import r
 
-
 router=APIRouter()
 
 @router.get('/autosearch/{arg}')
@@ -89,7 +88,7 @@ async def auto_search_movie(arg: str):
     [results] = await Promise.all([resultPromiseResult])
     for result in results:
         result["_id"] = str(result["_id"])
-        
+    results.sort(reverse=True,key=lambda x:x['imdb']['rating'])
     json_result=json.dumps(results)
     
     r.set(key,json_result)

@@ -31,7 +31,7 @@ async def signup(request: schemas.UserSignupSchema):
             print(empty_pwd.encode('utf-8'), hash_pwd.encode('utf-8'))
             if empty_pwd == hash_pwd:
                 token = jwt.encode(payload={"user_id": str(db_user.get('_id'))}, key=config["JWT_KEY"], algorithm="HS256")
-                result = await User.update_one({"email": request.email.lower()},{'$set':{'password':hashed_password,'name':request.name}})
+                result = await User.update_one({"email": request.email.lower()},{'$set':{'password':hashed_password,'name':request.name,'isGoogleAuth':False}})
                 if result is None:
                     raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Password was not change,signup again")
                 return {'status': 'success','message':'Password Changed successfully', 'token': token, 'fav': db_user.get('fav', []), 'watchlist': db_user.get('watchlist', [])}
@@ -126,7 +126,8 @@ async def auth_google(request: schemas.GoogleAuthLogin):
             "role": "user",
             'fav': [],
             'watchlist':[],
-            'profilePic':profilePic
+            'profilePic':profilePic,
+            'isGoogleAuth':True
         }
             
         await User.insert_one(user)
