@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException, status, Request
 from fastapi import Depends
 from src.routers.auth import get_current_user
-from datetime import datetime
+from datetime import datetime, timezone
 from src.db import Users, Movies, Comments, Watchlists, projects
 from typing import Optional, List
 from bson.objectid import ObjectId
@@ -108,7 +108,7 @@ async def comment(request: CommentSchema, user: dict = Depends(get_current_user)
             "email": user['email'],
             "movie_id": ObjectId(movie['_id']),
             "text": request.comment,
-            "date": datetime.now()
+            "date": datetime.now(timezone.utc)
         }
         await Comments.insert_one(comment)
         keys=r.keys(f"comment:{movie['_id']}:*")
