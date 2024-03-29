@@ -133,7 +133,7 @@ async def auth_google(request: schemas.GoogleAuthLogin):
         if '_id' in user:
             _id = str(user['_id'])
             
-        token = jwt.encode(payload={"user_id": str(_id)}, key=config["JWT_KEY"], algorithm="HS256")
+        token = jwt.encode(payload={"user_id": str(_id), 'exp': datetime.now(timezone.utc)+timedelta(hours=24)}, key=config["JWT_KEY"], algorithm="HS256")
         return {'status': 'success',"message": "User created successfully.", 'token': token, 'fav': [], 'watchlist':[]}
     except HTTPException as http_exc:
         raise http_exc
