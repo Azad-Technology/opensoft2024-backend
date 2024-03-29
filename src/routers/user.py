@@ -32,6 +32,8 @@ async def get_user(user: dict = Depends(get_current_user)):
             user['fav']=await get_movies(user['fav'])
         if not 'profilePic' in user:
             user['profilePic']=None
+        if not 'isGoogleAuth' in user:
+            user['isGoogleAuth']=False
         return user
     except HTTPException as http_exc:
         raise http_exc
