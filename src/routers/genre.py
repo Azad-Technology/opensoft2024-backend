@@ -18,7 +18,7 @@ router=APIRouter()
 
 
 @router.get('/genre_top/{genre_name}')     #name has to be changed
-async def get_movies_gtop(genre_name:str,  count: Optional[int] = 10):
+async def get_movies_and_series_by_genre_top(genre_name:str,  count: Optional[int] = 10):
     
     try:
         if count<1:
@@ -28,6 +28,7 @@ async def get_movies_gtop(genre_name:str,  count: Optional[int] = 10):
         value = r.get(key)
         if value:
             ret=json.loads(value)
+            print("Cached")
             return ret
         pipeline = [
             {
@@ -78,7 +79,7 @@ async def get_movies_gtop(genre_name:str,  count: Optional[int] = 10):
 
 
 @router.get('/genre_top_movies/{genre_name}')     #name has to be changed
-async def get_movies(genre_name:str,  count: Optional[int] = 10):
+async def get_movies_by_genre_top(genre_name:str,  count: Optional[int] = 10):
     
     try:
         if count<1:
@@ -91,6 +92,7 @@ async def get_movies(genre_name:str,  count: Optional[int] = 10):
             for re in ret:
                 if 'released' in re:
                     re['released']=str(re['released'])
+            print("Cached")
             return ret
         pipeline = [
             {
@@ -142,7 +144,7 @@ async def get_movies(genre_name:str,  count: Optional[int] = 10):
 
 
 @router.get('/genre_top_series/{genre_name}')     #name has to be changed
-async def get_movies_gts(genre_name:str,  count: Optional[int] = 10):
+async def get_series_by_genre_top(genre_name:str,  count: Optional[int] = 10):
     
     try:
         if count<1:
@@ -155,6 +157,7 @@ async def get_movies_gts(genre_name:str,  count: Optional[int] = 10):
             for re in ret:
                 if 'released' in re:
                     re['released']=str(re['released'])
+            print("Cached")
             return ret
         pipeline = [
             {
