@@ -25,8 +25,9 @@ async def signup(request: schemas.UserSignupSchema):
         hashed_password = bcrypt.hashpw(request.password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
         db_user = await User.find_one({"email": request.email.lower()})
         empty_pwd=""
-        hash_pwd=db_user.get('password','')
+        
         if db_user is not None:
+            hash_pwd=db_user.get('password','')
             print(empty_pwd.encode('utf-8'), hash_pwd.encode('utf-8'))
             if empty_pwd == hash_pwd:
                 token = jwt.encode(payload={"user_id": str(db_user.get('_id'))}, key=config["JWT_KEY"], algorithm="HS256")
