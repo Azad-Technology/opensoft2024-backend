@@ -77,10 +77,6 @@ async def init_tfidf_vectorizer():
             for country in movie["countries"]:
                 movie_countries+= (' ' + country)
                 
-        # movie_plot = " "
-        # if "plot" in movie:
-        #     movie_plot = movie.get('plot', "")
-        
         all_movie_data.append(movie['title'] + ' ' + movie_genres*5 + movie_cast*2 + movie_directors*2 + movie_countries*2)
     
     # tfidf_vectorizer = TfidfVectorizer(stop_words=stop_words, preprocessor=preprocess_text, tokenizer=lemmatize_text, max_features=2000, token_pattern=None)
@@ -96,7 +92,7 @@ def user_clicked_movies(user_clicked_movies):
     Transforms user-clicked movies into TF-IDF vectors using the initialized TF-IDF vectorizer.
     """
 
-    user_clicked_data = []
+    user_clicked_data = ""
     for movie in user_clicked_movies:
         movie_cast = " "
         if "cast" in movie:
@@ -118,10 +114,11 @@ def user_clicked_movies(user_clicked_movies):
             for country in movie["countries"]:
                 movie_countries+= (' ' + country)
                 
-        # movie_plot = movie.get('plot', "")
-        user_clicked_data.append(movie['title'] + ' ' + movie_genres*5 + movie_cast*2 + movie_directors*2 + movie_countries*2)
+        user_clicked_data += (movie['title'] + ' ' + movie_genres*5 + movie_cast*2 + movie_directors*2 + movie_countries*2)
     
-    return user_clicked_data
+    mod_data = []
+    mod_data.append(user_clicked_data)
+    return mod_data
 
 
 async def get_recommendations(user_clicked_data, top_n=10):
