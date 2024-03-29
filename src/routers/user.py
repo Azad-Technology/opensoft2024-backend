@@ -56,6 +56,9 @@ async def update_info(request: UpdateUserDetails , user: dict = Depends(get_curr
     try:
         update_fields = {}
         if request.new_email:
+            db_user=await Users.find_one({'email': request.new_email})
+            if db_user:
+                raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Email already exists")
             update_fields['email'] = request.new_email
         if request.new_name:
             update_fields['name'] = request.new_name
