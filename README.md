@@ -12,6 +12,16 @@ project_root
 ├── src
 │   ├── routers
 │   │   └── auth.py
+|   |   └── cast.py
+|   |   └── countries.py
+|   |   └── genre.py
+|   |   └── movie.py
+|   |   └── recommendation.py
+|   |   └── search.py
+|   |   └── user.py
+|   ├── utils
+|   |   └── recommend.py
+|   ├── cache_system.py
 │   ├── config.py
 │   ├── db.py
 │   ├── main.py
@@ -21,6 +31,10 @@ project_root
 ├── .env.example
 ├── .gitignore
 ├── README.md
+├── ATLAS.md
+├── README.md
+├── tfidf_vectorizer.pkl
+├── vercel.json
 └── requirements.txt
 ```
 
