@@ -130,15 +130,18 @@ async def get_movie_in_my_region(request:Request, count: Optional[int]=10, ip: O
                         result=await get_movies_from_country(country_to_search, count)
                         return result
                     else:
-                        return []
+                        result=await get_movies_from_country("USA", count)
+                        return result
                 else:
                     if country in countries_dict['_']:
                         result=await get_movies_from_country(country_to_search, count)
                         return result
                     else:
-                        return []
+                        result=await get_movies_from_country("USA", count)
+                        return result
             else:
-                return []
+                result=await get_movies_from_country("USA", count)
+                return result
         else:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Address not found')
     except HTTPException as http_exc:

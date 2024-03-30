@@ -193,7 +193,7 @@ def calculate_comment_age(comment_date):
     
     current_datetime = datetime.now(timezone.utc)
     
-    comment_datetime = comment_datetime.replace(tzinfo=timezone.utc)
+    comment_datetime = comment_date.replace(tzinfo=timezone.utc)
     
     age_delta = current_datetime - comment_datetime
 
@@ -283,8 +283,26 @@ async def get_movies_recent( count: Optional[int] = 10):
             return ret
         projection=projects
         projection['released']=1
-        movies_cur = Movies.find({"imdb.rating":{'$ne':''}},projection).sort([("released", -1)]).limit(count)
-        movies = await movies_cur.to_list(length=None)
+        pipeline=[{
+                "$addFields": {
+                    "imdb.rating": {
+                        "$cond": [
+                            { "$eq": ["$imdb.rating", ""] },
+                            2,
+                            "$imdb.rating"
+                        ]
+                    }
+                }
+            },
+            {
+                '$sort':{
+                    "released":-1
+                }
+            },
+            {"$limit":count},
+            {"$project":projection}
+        ]
+        movies = await Movies.aggregate(pipeline).to_list(length=None)
         for movie in movies:
             movie['_id']= str(movie['_id'])
         r.set(key,json.dumps(movies))
