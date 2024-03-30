@@ -332,10 +332,10 @@ async def get_related_movies(movie_id: str, count: Optional[int]=10):
                 movie['_id'] = str(movie['_id'])
         else:
             return []
-        fullplot=movie.get("fullplot","")
+        fullplot=movie.get("fullplot"," ")
         default_value=2
         pipeline=[
-            {"$match": {"_id": {"$ne": ObjectId(movie_id)}, "$text": {"$search": fullplot}, "type": movie.get("type",'')}},
+            {"$match": {"_id": {"$ne": ObjectId(movie_id)}, "type": movie.get("type",'')}},
             {
                 "$addFields": {
                     "imdb.rating": {
@@ -413,7 +413,7 @@ async def get_related_movies(movie_id: str, count: Optional[int]=10):
                         "else": 0  # Handle null or empty array
                     }
                 },
-                "relevance_score1": {'$divide':[{"$meta": "textScore"}, {'$add':[len(movie.get('fullplot', ' ')), {'$strLenCP': {"$ifNull": ["$fullplot", " "]}}]}]},
+                "relevance_score1": {'$literal':0},
                 "title_similarity": 1
             }},
             {"$addFields": {
