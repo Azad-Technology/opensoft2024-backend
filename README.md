@@ -5,7 +5,7 @@
 ## Project Structure
 
 The project is structured as follows, ensuring modular and organized management of various functionalities:
-
+Backends:
 ```
 project_root
 │
@@ -32,9 +32,28 @@ project_root
 ├── .gitignore
 ├── README.md
 ├── ATLAS.md
-├── README.md
 ├── tfidf_vectorizer.pkl
 ├── vercel.json
+└── requirements.txt
+```
+```
+project_root
+│
+├── src
+│   ├── routers
+│   │   └── embeddings.py
+|   ├── utils
+|   |   └── nlp.py
+|   |   └── ada_embedder.py
+|   ├── cache_system.py
+│   ├── config.py
+│   ├── db.py
+│   ├── main.py
+│   ├── __init__.py
+│   └── schemas.py
+├── .env
+├── .env.example
+├── .gitignore
 └── requirements.txt
 ```
 
@@ -100,9 +119,29 @@ source env/Scripts/activate #For Windows on Git Bash</code></pre>
 <br />
 
 ## API Structures
-<h3>Backend</h3>
+<h3>Backends</h3>
 <ol>
     <li>
         <link>https://lb.popkorn.tech/docs</link>
+    </li>
+    <li>
+        <link>https://embed.popkorn.tech/docs</link>
+    </li>
+</ol>
+
+## Tech Stacks Used
+<h3>Tech Stacks Used are:</h3>
+<ol>
+    <li>
+        <p>FastAPI</p>
+    </li>
+    <li>
+        <p>MongoDB</p>
+    </li>
+    <li>
+        <p>Redis</p>
+    </li>
+    <li>
+        <p>Google API</p>
     </li>
 </ol>
