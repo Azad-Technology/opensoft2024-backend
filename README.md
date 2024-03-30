@@ -52,7 +52,7 @@ project_root
     <li>
         <strong>Activate environment</strong>:
         <pre><code>source env/bin/activate #For Linux
-        source env/Scripts/activate #For Windows on Git Bash</code></pre>
+source env/Scripts/activate #For Windows on Git Bash</code></pre>
         <p>This will activate the env folder.</p>
     </li>
 </ol>
