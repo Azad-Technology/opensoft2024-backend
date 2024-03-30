@@ -11,6 +11,7 @@ import pycountry
 import json
 from pymongo import TEXT
 from src.cache_system import r
+from datetime import datetime, timezone
 
 router = APIRouter()
 
@@ -187,6 +188,43 @@ async def get_comments_by_movieid(movie_id : str, count: Optional[int] = 10):
     except Exception as e:
         raise HTTPException(status_code = 500, detail=str(e))
     
+    
+def calculate_comment_age(comment_date):
+    
+    current_datetime = datetime.now(timezone.utc)
+    
+    comment_datetime = comment_datetime.replace(tzinfo=timezone.utc)
+    
+    age_delta = current_datetime - comment_datetime
+
+    
+    years = age_delta.days // 365
+    months = (age_delta.days % 365) // 30
+    days = age_delta.days % 30
+    hours = age_delta.seconds // 3600
+    minutes = (age_delta.seconds % 3600) // 60
+    seconds = age_delta.seconds % 60
+
+    # Construct the age string
+    age_string = ""
+    if years >= 100:
+        age_string = "more than a century"
+    elif years > 0:
+        age_string += f"{years} {'year' if years == 1 else 'years'}"
+    elif months > 0:
+        age_string += f"{months} {'month' if months == 1 else 'months'}"
+    elif days > 0:
+        age_string += f"{days} {'day' if days == 1 else 'days'}"
+    elif hours > 0:
+        age_string += f"{hours} {'hour' if hours == 1 else 'hours'}"
+    elif minutes > 0:
+        age_string += f"{minutes} {'minute' if minutes == 1 else 'minutes'}"
+    else:
+        age_string += f"{seconds} {'second' if seconds == 1 else 'seconds'}"
+
+    return age_string + " ago"
+
+
 @router.get('/recent_comments')
 async def get_recent_comments(count: Optional[int] = 10):
     try:
@@ -218,6 +256,7 @@ async def get_recent_comments(count: Optional[int] = 10):
         for comment in comments:
             comment['_id']=str(comment['_id'])
             comment['movie_id']=str(comment['movie_id'])
+            comment['ago']=calculate_comment_age(comment['date'])
             comment['date']=comment['date'].strftime('%Y-%m-%d %H:%M:%S')
             movies.append(comment['movie_id'])
         movies2= await get_movies_by_ids(movies)
