@@ -42,7 +42,20 @@ project_root
 <br />
 
 <h2> Setup and Installation</h2>
-
+<h3>Environment Formation</h3>
+<ol>
+    <li>
+        <strong>Make env folder</strong>:
+        <pre><code>python -m venv env</code></pre>
+        <p>This will make an env folder.</p>
+    </li>
+    <li>
+        <strong>Activate environment</strong>:
+        <pre><code>source env/bin/activate #For Linux
+        source env/Scripts/activate #For Windows on Git Bash</code></pre>
+        <p>This will activate the env folder.</p>
+    </li>
+</ol>
 <h3>Setup</h3>
 <ol>
     <strong>Install dependencies</strong>:
